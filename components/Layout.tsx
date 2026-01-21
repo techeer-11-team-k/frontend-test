@@ -173,9 +173,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
       <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
       {/* ----------------------------------------------------------------------
-          PC HEADER (Frosted Glass with Border)
+          PC HEADER (Original Design - Restored)
       ----------------------------------------------------------------------- */}
-      <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 items-center justify-between px-8 glass-card shadow-soft mx-8 mt-4 rounded-[28px]">
+      <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 items-center justify-between px-8 bg-white/95 backdrop-blur-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100/80 mx-8 mt-4 rounded-[28px]">
         <div className="flex items-center gap-12">
           <div onClick={() => onChangeView('dashboard')} className="cursor-pointer">
               <Logo />

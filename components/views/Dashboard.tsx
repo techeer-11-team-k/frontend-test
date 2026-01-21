@@ -4,6 +4,9 @@ import { Property, ViewProps } from '../../types';
 import { ProfessionalChart, ChartSeriesData } from '../ui/ProfessionalChart';
 import { Skeleton } from '../ui/Skeleton';
 import { NumberTicker } from '../ui/NumberTicker';
+import { PolicyNewsList } from './PolicyNewsList';
+import { RegionComparisonChart } from './RegionComparisonChart';
+import { ProfileWidgetsCard } from '../ProfileWidgetsCard';
 
 // ----------------------------------------------------------------------
 // DATA & UTILS
@@ -383,196 +386,23 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
 
   return (
     <div className="relative">
-        {/* PC Layout - Increased Spacing */}
-        <div className="hidden md:flex flex-col gap-12 pb-24">
-            {/* Policy Banner (same width as the left main card: col-span-8) */}
-            <div className="grid grid-cols-12 gap-12">
-                <div className="col-span-12">
-                    <div className="flex items-center gap-4 glass-card rounded-[28px] p-6 shadow-soft hover:shadow-deep transition-all">
-                        <span className="flex-shrink-0 text-[12px] font-black text-white bg-brand-blue px-3 py-1 rounded-full">
-                            정책
-                        </span>
-                        <div className="min-w-0 flex-1">
-                            <p className="text-[17px] font-black text-slate-900 truncate">
-                                안산지역 재개발 예정
-                            </p>
-                            <p className="text-[13px] text-slate-500 font-medium mt-1 truncate">
-                                사업 구역 검토 단계 · 인허가/일정은 변동될 수 있어요
-                            </p>
-                        </div>
-                        <button className="flex-shrink-0 px-4 h-10 rounded-full bg-slate-900 text-white text-[13px] font-black hover:bg-slate-800 transition-colors">
-                            자세히
-                        </button>
-                    </div>
+        {/* PC Layout - Restored */}
+        <div className="hidden md:flex flex-col gap-8 pb-24">
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-12 gap-8">
+                {/* Left: Profile & Widgets Card - Reduced width */}
+                <div className="col-span-2">
+                    <ProfileWidgetsCard />
                 </div>
-            </div>
-
-            {/* Main dashboard cards */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-12 min-h-[820px]">
                 
-                {/* LEFT COLUMN (Chart) */}
-                <div className="col-span-8 h-full flex flex-col gap-6">
-                    <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] bg-noise rounded-[28px] p-10 text-white shadow-deep relative overflow-hidden group flex flex-col flex-1 min-h-0 border border-white/5">
-                        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] glow-blue blur-[120px] pointer-events-none"></div>
-                        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] glow-cyan blur-[100px] pointer-events-none"></div>
-
-                        <div className="flex flex-col items-start mb-8 relative z-10">
-                            <div className="flex items-start gap-2 mb-2 text-slate-400 text-[15px] font-bold uppercase tracking-wide">
-                                {activeGroup.name}
-                            </div>
-                            <div className="flex items-start gap-4">
-                                {isLoading ? (
-                                    <Skeleton className="h-14 w-60 rounded-lg bg-white/10" />
-                                ) : (
-                                    <div className="flex flex-col items-start">
-                                        <span className="text-[clamp(2.5rem,2.5vw,4rem)] font-black tracking-normal tabular-nums animate-enter leading-none -ml-[0.09em]">
-                                            <NumberTicker value={totalValue} formatter={formatPriceString} />
-                                        </span>
-                                        <span className="mt-1 text-[16px] font-normal text-white/80">
-                                            저번달 대비 {Math.abs(totalProfitRate).toFixed(1)}% 올랐어요
-                                        </span>
-                                    </div>
-                                )}
-                                
-                                {!isLoading && (
-                                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md border ${totalProfit >= 0 ? 'bg-red-500/20 border-red-500/30 text-red-100' : 'bg-blue-500/20 border-blue-500/30 text-blue-100'} mt-1.5`}>
-                                        <span className="text-lg font-bold tabular-nums">
-                                            <FormatPriceWithUnit value={Math.abs(totalProfit)} isDiff />
-                                        </span>
-                                        <span className="text-[13px] font-medium opacity-80">({totalProfitRate.toFixed(1)}%)</span>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="absolute right-0 top-0 flex flex-col items-end gap-2">
-                                    <button 
-                                    onClick={onViewAllPortfolio}
-                                    className="flex items-center gap-2 text-[13px] font-bold text-white transition-all bg-white/10 hover:bg-brand-mint hover:text-deep-900 border border-white/20 px-5 py-2.5 rounded-full backdrop-blur-md group-hover:shadow-glow"
-                                >
-                                    자산 분석 상세 <ChevronRight className="w-3 h-3" />
-                                </button>
-                                <span className="text-[11px] text-slate-500 font-medium">2024.12.15 기준</span>
-                            </div>
-                        </div>
-
-                        <div className="relative z-10 flex-1 flex flex-col">
-                            <div className="flex justify-end gap-2 mb-4">
-                                {['3개월', '6개월', '1년', '전체'].map(t => (
-                                    <button key={t} className={`text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm border transition-all ${t === '1년' ? 'bg-white text-deep-900 border-white shadow-neon-mint' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'}`}>
-                                        {t}
-                                    </button>
-                                ))}
-                            </div>
-                            <div className="flex-1 w-full min-h-0">
-                                {isLoading ? (
-                                    <Skeleton className="w-full h-full rounded-xl bg-white/5" />
-                                ) : (
-                                    <ProfessionalChart 
-                                        series={chartSeries}
-                                        height={420} 
-                                        theme="dark"
-                                    />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Ranking Card (same width as the chart card because it's in the same left column) */}
-                    <div className="glass-card rounded-[28px] p-8 shadow-soft relative overflow-hidden flex-shrink-0 h-[220px]">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-black text-slate-900 tracking-tight">Ranking</h3>
-                            <div className="flex items-center gap-2">
-                                <div className="bg-slate-100 p-1 rounded-full flex items-center shadow-inner">
-                                    <button
-                                        onClick={() => setRankingScope('mine')}
-                                        className={`px-3 h-7 rounded-full text-[12px] font-black transition-all ${
-                                            rankingScope === 'mine' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                                        }`}
-                                    >
-                                        내꺼
-                                    </button>
-                                    <button
-                                        onClick={() => setRankingScope('national')}
-                                        className={`px-3 h-7 rounded-full text-[12px] font-black transition-all ${
-                                            rankingScope === 'national' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                                        }`}
-                                    >
-                                        전국
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {isLoading ? (
-                            <div className="space-y-2">
-                                <Skeleton className="h-10 w-full rounded-xl" />
-                                <Skeleton className="h-10 w-full rounded-xl" />
-                                <Skeleton className="h-10 w-full rounded-xl" />
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-2 gap-4 h-[160px]">
-                                <div className="flex flex-col min-h-0">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-[12px] font-black text-red-600">상승률 TOP 5</span>
-                                    </div>
-                                    <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 space-y-1">
-                                        {rankingUp.length > 0 ? rankingUp.map((a, idx) => (
-                                            <button
-                                                key={`up-${a.id}`}
-                                                onClick={() => onPropertyClick(a.id)}
-                                                className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200"
-                                            >
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <span className="w-5 text-left text-[12px] font-black text-slate-400 tabular-nums">{idx + 1}</span>
-                                                    <span className="truncate text-[13px] font-bold text-slate-900">{a.name}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 text-[12px] font-black tabular-nums text-red-500">
-                                                    <span>▲</span>
-                                                    <span>{a.changeRate.toFixed(1)}%</span>
-                                                </div>
-                                            </button>
-                                        )) : (
-                                            <div className="h-full flex items-center justify-center text-slate-400 text-[12px] font-medium">
-                                                데이터 없음
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col min-h-0">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-[12px] font-black text-blue-600">하락률 TOP 5</span>
-                                    </div>
-                                    <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 space-y-1">
-                                        {rankingDown.length > 0 ? rankingDown.map((a, idx) => (
-                                            <button
-                                                key={`down-${a.id}`}
-                                                onClick={() => onPropertyClick(a.id)}
-                                                className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200"
-                                            >
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <span className="w-5 text-left text-[12px] font-black text-slate-400 tabular-nums">{idx + 1}</span>
-                                                    <span className="truncate text-[13px] font-bold text-slate-900">{a.name}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 text-[12px] font-black tabular-nums text-blue-600">
-                                                    <span>▼</span>
-                                                    <span>{Math.abs(a.changeRate).toFixed(1)}%</span>
-                                                </div>
-                                            </button>
-                                        )) : (
-                                            <div className="h-full flex items-center justify-center text-slate-400 text-[12px] font-medium">
-                                                데이터 없음
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* RIGHT COLUMN (Asset List) */}
-                <div className="col-span-4 h-full flex flex-col">
-                    <div className="glass-card rounded-[28px] p-10 shadow-soft flex flex-col h-full min-h-0 relative overflow-hidden">
+                {/* Right: Main Content Area - Increased width */}
+                <div className="col-span-10">
+                    <div className="grid grid-cols-12 gap-8">
+                        {/* Top Row: Asset List and Chart */}
+                        <div className="col-span-12 grid grid-cols-12 gap-8 min-h-[600px]">
+                            {/* LEFT COLUMN (Asset List) - Increased width */}
+                            <div className="col-span-5 h-full flex flex-col">
+                    <div className="bg-white rounded-[28px] p-10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100/80 flex flex-col h-full min-h-0 relative overflow-hidden">
                         <div className="flex items-center justify-between mb-6 px-1">
                             <h2 className="text-xl font-black text-slate-900 tracking-tight">자산 리스트</h2>
                             <button className="text-[13px] font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1.5 hover:bg-slate-50 p-2 rounded-lg transition-colors">
@@ -607,6 +437,86 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                         <button className="w-full mt-6 py-4 rounded-xl border border-dashed border-slate-300 text-slate-500 font-bold hover:bg-slate-50 hover:text-slate-900 hover:border-slate-900 transition-all flex items-center justify-center gap-2 flex-shrink-0 active:scale-95 text-[15px]">
                             <Plus className="w-4 h-4" /> {activeGroup.name}에 추가하기
                         </button>
+                    </div>
+                </div>
+
+                            {/* RIGHT COLUMN (Chart) - Adjusted width */}
+                            <div className="col-span-7 h-full flex flex-col gap-6">
+                                <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] bg-noise rounded-[28px] p-10 text-white shadow-deep relative overflow-hidden group flex flex-col flex-1 min-h-0 border border-white/5">
+                                    <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] glow-blue blur-[120px] pointer-events-none"></div>
+                                    <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] glow-cyan blur-[100px] pointer-events-none"></div>
+
+                                    <div className="flex flex-col items-start mb-8 relative z-10">
+                                        <div className="flex items-start gap-2 mb-2 text-slate-400 text-[15px] font-bold uppercase tracking-wide">
+                                            {activeGroup.name}
+                                        </div>
+                                        <div className="flex items-start gap-4">
+                                            {isLoading ? (
+                                                <Skeleton className="h-14 w-60 rounded-lg bg-white/10" />
+                                            ) : (
+                                                <div className="flex flex-col items-start">
+                                                    <span className="text-[clamp(2.5rem,2.5vw,4rem)] font-black tracking-normal tabular-nums animate-enter leading-none -ml-[0.09em]">
+                                                        <NumberTicker value={totalValue} formatter={formatPriceString} />
+                                                    </span>
+                                                    <span className="mt-1 text-[16px] font-normal text-white/80">
+                                                        저번달 대비 {Math.abs(totalProfitRate).toFixed(1)}% 올랐어요
+                                                    </span>
+                                                </div>
+                                            )}
+                                            
+                                            {!isLoading && (
+                                                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md border ${totalProfit >= 0 ? 'bg-red-500/20 border-red-500/30 text-red-100' : 'bg-blue-500/20 border-blue-500/30 text-blue-100'} mt-1.5`}>
+                                                    <span className="text-lg font-bold tabular-nums">
+                                                        <FormatPriceWithUnit value={Math.abs(totalProfit)} isDiff />
+                                                    </span>
+                                                    <span className="text-[13px] font-medium opacity-80">({totalProfitRate.toFixed(1)}%)</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="absolute right-0 top-0 flex flex-col items-end gap-2">
+                                                <button 
+                                                onClick={onViewAllPortfolio}
+                                                className="flex items-center gap-2 text-[13px] font-bold text-white transition-all bg-white/10 hover:bg-brand-mint hover:text-deep-900 border border-white/20 px-5 py-2.5 rounded-full backdrop-blur-md group-hover:shadow-glow"
+                                            >
+                                                자산 분석 상세 <ChevronRight className="w-3 h-3" />
+                                            </button>
+                                            <span className="text-[11px] text-slate-500 font-medium">2024.12.15 기준</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="relative z-10 flex-1 flex flex-col">
+                                        <div className="flex justify-end gap-2 mb-4">
+                                            {['3개월', '6개월', '1년', '전체'].map(t => (
+                                                <button key={t} className={`text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm border transition-all ${t === '1년' ? 'bg-white text-deep-900 border-white shadow-neon-mint' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'}`}>
+                                                    {t}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="flex-1 w-full min-h-0">
+                                            {isLoading ? (
+                                                <Skeleton className="w-full h-full rounded-xl bg-white/5" />
+                                            ) : (
+                                                <ProfessionalChart 
+                                                    series={chartSeries}
+                                                    height={420} 
+                                                    theme="dark"
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Row: Policy News & Region Comparison - Same gap as top row */}
+                    <div className="grid grid-cols-12 gap-8 mt-8">
+                        <div className="col-span-7 h-[466px]">
+                            <PolicyNewsList />
+                        </div>
+                        <div className="col-span-5 h-[466px]">
+                            <RegionComparisonChart />
+                        </div>
                     </div>
                 </div>
             </div>

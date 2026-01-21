@@ -100,7 +100,7 @@
         color: #111827;
       }
 
-      /* Modern Mesh Gradient Background */
+      /* Modern Mesh Gradient Background - CryptoMind style */
       .mesh-gradient-bg {
         position: fixed;
         top: 0;
@@ -109,9 +109,10 @@
         height: 100%;
         z-index: -1;
         background: 
-          radial-gradient(1200px circle at 50% 40%, #e2e8f0 0%, transparent 60%),
-          radial-gradient(900px circle at 70% 10%, #93c5fd 0%, transparent 55%), 
-          linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+          radial-gradient(1200px circle at 50% 40%, rgba(248, 250, 252, 0.8) 0%, transparent 60%),
+          radial-gradient(900px circle at 70% 10%, rgba(147, 197, 253, 0.15) 0%, transparent 55%), 
+          radial-gradient(800px circle at 30% 80%, rgba(196, 181, 253, 0.12) 0%, transparent 50%),
+          linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       }
 
       .mesh-gradient-bg::before {
@@ -122,12 +123,12 @@
         width: 100%;
         height: 100%;
         background: 
-          radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(96, 165, 250, 0.12) 0%, transparent 50%),
-          radial-gradient(circle at 40% 70%, rgba(37, 99, 235, 0.10) 0%, transparent 50%),
-          radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.13) 0%, transparent 50%),
-          radial-gradient(circle at 10% 90%, rgba(147, 197, 253, 0.12) 0%, transparent 50%),
-          radial-gradient(circle at 50% 50%, rgba(96, 165, 250, 0.08) 0%, transparent 70%);
+          radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+          radial-gradient(circle at 40% 70%, rgba(34, 197, 94, 0.05) 0%, transparent 50%),
+          radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.07) 0%, transparent 50%),
+          radial-gradient(circle at 10% 90%, rgba(147, 197, 253, 0.06) 0%, transparent 50%),
+          radial-gradient(circle at 50% 50%, rgba(196, 181, 253, 0.04) 0%, transparent 70%);
         animation: meshMove 20s ease-in-out infinite;
       }
 
@@ -139,8 +140,9 @@
         width: 100%;
         height: 100%;
         background: 
-          radial-gradient(circle at 60% 40%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
-          radial-gradient(circle at 30% 80%, rgba(96, 165, 250, 0.10) 0%, transparent 45%);
+          radial-gradient(circle at 60% 40%, rgba(59, 130, 246, 0.06) 0%, transparent 40%),
+          radial-gradient(circle at 30% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 45%),
+          radial-gradient(circle at 70% 60%, rgba(34, 197, 94, 0.04) 0%, transparent 40%);
         animation: meshMove 15s ease-in-out infinite reverse;
       }
 
@@ -212,10 +214,11 @@
       }
 
       .glass-card {
-        background: linear-gradient(135deg, #F8FAFC 0%, #E6EAF2 100%);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(230, 234, 242, 0.50);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
       }
 
       /* Radial Gradients */
