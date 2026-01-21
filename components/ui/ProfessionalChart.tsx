@@ -17,6 +17,7 @@ interface ProfessionalChartProps {
     areaTopColor?: string;
     areaBottomColor?: string;
     isSparkline?: boolean;
+    showHighLow?: boolean;
 }
 
 export const ProfessionalChart: React.FC<ProfessionalChartProps> = ({ 
@@ -27,7 +28,8 @@ export const ProfessionalChart: React.FC<ProfessionalChartProps> = ({
     lineColor,
     areaTopColor,
     areaBottomColor,
-    isSparkline = false
+    isSparkline = false,
+    showHighLow = false
 }) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
@@ -118,7 +120,49 @@ export const ProfessionalChart: React.FC<ProfessionalChartProps> = ({
                 });
                 const sortedData = [...s.data].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
                 const uniqueData = sortedData.filter((item, index, self) => index === 0 || item.time !== self[index - 1].time);
-                if (uniqueData.length > 0) lineSeries.setData(uniqueData);
+                if (uniqueData.length > 0) {
+                    lineSeries.setData(uniqueData);
+                    
+                    // 최고점, 최저점 마커 표시
+                    if (showHighLow && uniqueData.length > 1) {
+                        let maxPoint = uniqueData[0];
+                        let minPoint = uniqueData[0];
+                        
+                        uniqueData.forEach(point => {
+                            if (point.value > maxPoint.value) maxPoint = point;
+                            if (point.value < minPoint.value) minPoint = point;
+                        });
+                        
+                        const markers: SeriesMarker<Time>[] = [];
+                        
+                        // 최고점 마커 (빨간색 점)
+                        markers.push({
+                            time: maxPoint.time as Time,
+                            position: 'aboveBar',
+                            color: '#FF4B4B',
+                            shape: 'circle',
+                            size: 0.8,
+                        });
+                        
+                        // 최저점 마커 (파란색 점)
+                        markers.push({
+                            time: minPoint.time as Time,
+                            position: 'belowBar',
+                            color: '#3182F6',
+                            shape: 'circle',
+                            size: 0.8,
+                        });
+                        
+                        // 마커를 시간순으로 정렬 (lightweight-charts 요구사항)
+                        markers.sort((a, b) => {
+                            const timeA = new Date(a.time as string).getTime();
+                            const timeB = new Date(b.time as string).getTime();
+                            return timeA - timeB;
+                        });
+                        
+                        lineSeries.setMarkers(markers);
+                    }
+                }
             });
         } else if (data && data.length > 0) {
             const mainColor = lineColor || '#3182F6'; 

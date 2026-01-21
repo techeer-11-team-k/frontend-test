@@ -104,6 +104,11 @@
         color: #111827;
       }
 
+      body.dark {
+        background-color: #0f172a;
+        color: #f1f5f9;
+      }
+
       /* Modern Mesh Gradient Background - CryptoMind style */
       .mesh-gradient-bg {
         position: fixed;
@@ -117,6 +122,15 @@
           radial-gradient(900px circle at 70% 10%, rgba(147, 197, 253, 0.15) 0%, transparent 55%), 
           radial-gradient(800px circle at 30% 80%, rgba(196, 181, 253, 0.12) 0%, transparent 50%),
           linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        transition: background 0.3s ease;
+      }
+
+      .dark .mesh-gradient-bg {
+        background: 
+          radial-gradient(1200px circle at 50% 40%, rgba(15, 23, 42, 0.8) 0%, transparent 60%),
+          radial-gradient(900px circle at 70% 10%, rgba(30, 58, 138, 0.15) 0%, transparent 55%), 
+          radial-gradient(800px circle at 30% 80%, rgba(55, 48, 163, 0.12) 0%, transparent 50%),
+          linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       }
 
       .mesh-gradient-bg::before {
@@ -245,6 +259,22 @@
       
       .glow-cyan {
         background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 100%);
+      }
+
+      /* Slide in from right animation */
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .animate-slide-in-right {
+        animation: slideInRight 0.3s ease-out;
       }
     </style>
   <script type="importmap">
