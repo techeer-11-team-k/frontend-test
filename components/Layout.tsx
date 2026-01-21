@@ -240,7 +240,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
         isMapMode 
           ? 'h-screen w-full p-0 md:pt-16 md:px-0' 
           : (isDashboard ? 'pt-0 md:pt-24 px-0 md:px-8' : 'pt-14 md:pt-24 px-4 md:px-8')
-      } ${isDashboard ? 'max-w-[1600px] 2xl:max-w-[1760px]' : 'max-w-[1400px]'} mx-auto min-h-screen relative`}>
+      } ${isDashboard ? 'max-w-[1600px] 2xl:max-w-[1760px]' : 'max-w-[1400px]'} ${isMapMode ? '' : 'mx-auto'} min-h-screen relative`}>
         
         {/* Mobile Header */}
         {isDashboard && !isDetailOpen && !isMapMode && (
