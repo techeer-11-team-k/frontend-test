@@ -204,6 +204,7 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
   const [activeGroupId, setActiveGroupId] = useState<string>('my');
   const [viewMode, setViewMode] = useState<'separate' | 'combined'>('separate');
   const [sortOption, setSortOption] = useState<string>('currentPrice-desc');
+  const [rankingScope, setRankingScope] = useState<'mine' | 'national'>('mine');
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -247,6 +248,27 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
           return dir === 'asc' ? valA - valB : valB - valA;
       });
   }, [activeGroup.assets, sortOption]);
+
+  // Ranking data source
+  const rankingSourceAssets = useMemo(() => {
+      if (rankingScope === 'mine') return activeGroup.assets;
+      // "전국"은 데모 데이터이므로 모든 그룹의 자산을 합쳐 보여줍니다.
+      return assetGroups.flatMap(g => g.assets);
+  }, [rankingScope, activeGroup.assets, assetGroups]);
+
+  const rankingUp = useMemo(() => {
+      return [...rankingSourceAssets]
+          .filter(a => a.isVisible && a.changeRate > 0)
+          .sort((a, b) => b.changeRate - a.changeRate)
+          .slice(0, 5);
+  }, [rankingSourceAssets]);
+
+  const rankingDown = useMemo(() => {
+      return [...rankingSourceAssets]
+          .filter(a => a.isVisible && a.changeRate < 0)
+          .sort((a, b) => a.changeRate - b.changeRate) // more negative first
+          .slice(0, 5);
+  }, [rankingSourceAssets]);
 
   const calculateAverageData = (assets: DashboardAsset[]) => {
       if (assets.length === 0) return [];
@@ -362,39 +384,54 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
   return (
     <div className="relative">
         {/* PC Layout - Increased Spacing */}
-        <div className="hidden md:flex flex-col gap-10 pb-20">
-            <div className="w-full">
-                <div className="flex items-center gap-3 bg-white rounded-xl p-3 border border-slate-200 hover:border-slate-300 hover:shadow-soft transition-all cursor-pointer group">
-                   <span className="flex-shrink-0 text-[11px] font-black text-slate-900 bg-brand-mint px-2 py-0.5 rounded shadow-neon-mint">NEWS</span>
-                   <span className="text-[15px] font-bold text-slate-700 group-hover:text-blue-600 transition-colors">
-                      1기 신도시 재건축 선도지구 발표... 분당·일산 기대감
-                   </span>
-                   <div className="ml-auto flex items-center gap-2 text-[13px] text-slate-400 font-medium">
-                       <span className="bg-slate-50 px-2 py-0.5 rounded text-slate-500">부동산경제</span>
-                       <span>방금 전</span>
-                   </div>
+        <div className="hidden md:flex flex-col gap-12 pb-24">
+            {/* Policy Banner (same width as the left main card: col-span-8) */}
+            <div className="grid grid-cols-12 gap-12">
+                <div className="col-span-12">
+                    <div className="flex items-center gap-4 bg-white rounded-[28px] p-6 border border-slate-200 shadow-soft hover:shadow-deep transition-all">
+                        <span className="flex-shrink-0 text-[12px] font-black text-white bg-brand-blue px-3 py-1 rounded-full">
+                            정책
+                        </span>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[17px] font-black text-slate-900 truncate">
+                                안산지역 재개발 예정
+                            </p>
+                            <p className="text-[13px] text-slate-500 font-medium mt-1 truncate">
+                                사업 구역 검토 단계 · 인허가/일정은 변동될 수 있어요
+                            </p>
+                        </div>
+                        <button className="flex-shrink-0 px-4 h-10 rounded-full bg-slate-900 text-white text-[13px] font-black hover:bg-slate-800 transition-colors">
+                            자세히
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* Reduced height to 600px from 700px */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-10 h-[600px]">
+            {/* Main dashboard cards */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-12 min-h-[820px]">
                 
                 {/* LEFT COLUMN (Chart) */}
-                <div className="col-span-7 h-full flex flex-col">
-                    <div className="bg-[#0f172a] bg-noise rounded-[24px] p-8 text-white shadow-deep relative overflow-hidden group flex flex-col h-full border border-white/5">
-                        <div className="absolute top-[-50%] left-[-20%] w-[800px] h-[800px] bg-gradient-radial from-blue-500/10 to-transparent blur-[100px] pointer-events-none"></div>
+                <div className="col-span-8 h-full flex flex-col gap-6">
+                    <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] bg-noise rounded-[28px] p-10 text-white shadow-deep relative overflow-hidden group flex flex-col flex-1 min-h-0 border border-white/5">
+                        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] glow-blue blur-[120px] pointer-events-none"></div>
+                        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] glow-cyan blur-[100px] pointer-events-none"></div>
 
                         <div className="flex flex-col items-start mb-8 relative z-10">
-                            <div className="flex items-center gap-2 mb-2 text-slate-400 text-[15px] font-bold uppercase tracking-wide">
+                            <div className="flex items-start gap-2 mb-2 text-slate-400 text-[15px] font-bold uppercase tracking-wide">
                                 {activeGroup.name}
                             </div>
                             <div className="flex items-start gap-4">
                                 {isLoading ? (
                                     <Skeleton className="h-14 w-60 rounded-lg bg-white/10" />
                                 ) : (
-                                    <span className="text-[clamp(2.5rem,2.5vw,4rem)] font-black tracking-normal tabular-nums animate-enter leading-none">
-                                        <NumberTicker value={totalValue} formatter={formatPriceString} />
-                                    </span>
+                                    <div className="flex flex-col items-start">
+                                        <span className="text-[clamp(2.5rem,2.5vw,4rem)] font-black tracking-normal tabular-nums animate-enter leading-none -ml-[0.09em]">
+                                            <NumberTicker value={totalValue} formatter={formatPriceString} />
+                                        </span>
+                                        <span className="mt-1 text-[16px] font-normal text-white/80">
+                                            저번달 대비 {Math.abs(totalProfitRate).toFixed(1)}% 올랐어요
+                                        </span>
+                                    </div>
                                 )}
                                 
                                 {!isLoading && (
@@ -407,9 +444,9 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                                 )}
                             </div>
                             <div className="absolute right-0 top-0 flex flex-col items-end gap-2">
-                                <button 
+                                    <button 
                                     onClick={onViewAllPortfolio}
-                                    className="flex items-center gap-2 text-[13px] font-bold text-white transition-all bg-white/10 hover:bg-brand-mint hover:text-deep-900 border border-white/20 px-4 py-2 rounded-full backdrop-blur-md group-hover:shadow-glow"
+                                    className="flex items-center gap-2 text-[13px] font-bold text-white transition-all bg-white/10 hover:bg-brand-mint hover:text-deep-900 border border-white/20 px-5 py-2.5 rounded-full backdrop-blur-md group-hover:shadow-glow"
                                 >
                                     자산 분석 상세 <ChevronRight className="w-3 h-3" />
                                 </button>
@@ -431,18 +468,111 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                                 ) : (
                                     <ProfessionalChart 
                                         series={chartSeries}
-                                        height={380} 
+                                        height={420} 
                                         theme="dark"
                                     />
                                 )}
                             </div>
                         </div>
                     </div>
+
+                    {/* Ranking Card (same width as the chart card because it's in the same left column) */}
+                    <div className="bg-white rounded-[28px] p-8 border border-slate-200 shadow-soft relative overflow-hidden flex-shrink-0 h-[220px]">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-black text-slate-900 tracking-tight">Ranking</h3>
+                            <div className="flex items-center gap-2">
+                                <div className="bg-slate-100 p-1 rounded-full flex items-center shadow-inner">
+                                    <button
+                                        onClick={() => setRankingScope('mine')}
+                                        className={`px-3 h-7 rounded-full text-[12px] font-black transition-all ${
+                                            rankingScope === 'mine' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                                        }`}
+                                    >
+                                        내꺼
+                                    </button>
+                                    <button
+                                        onClick={() => setRankingScope('national')}
+                                        className={`px-3 h-7 rounded-full text-[12px] font-black transition-all ${
+                                            rankingScope === 'national' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                                        }`}
+                                    >
+                                        전국
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {isLoading ? (
+                            <div className="space-y-2">
+                                <Skeleton className="h-10 w-full rounded-xl" />
+                                <Skeleton className="h-10 w-full rounded-xl" />
+                                <Skeleton className="h-10 w-full rounded-xl" />
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 gap-4 h-[160px]">
+                                <div className="flex flex-col min-h-0">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[12px] font-black text-red-600">상승률 TOP 5</span>
+                                    </div>
+                                    <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 space-y-1">
+                                        {rankingUp.length > 0 ? rankingUp.map((a, idx) => (
+                                            <button
+                                                key={`up-${a.id}`}
+                                                onClick={() => onPropertyClick(a.id)}
+                                                className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200"
+                                            >
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <span className="w-5 text-left text-[12px] font-black text-slate-400 tabular-nums">{idx + 1}</span>
+                                                    <span className="truncate text-[13px] font-bold text-slate-900">{a.name}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-[12px] font-black tabular-nums text-red-500">
+                                                    <span>▲</span>
+                                                    <span>{a.changeRate.toFixed(1)}%</span>
+                                                </div>
+                                            </button>
+                                        )) : (
+                                            <div className="h-full flex items-center justify-center text-slate-400 text-[12px] font-medium">
+                                                데이터 없음
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col min-h-0">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[12px] font-black text-blue-600">하락률 TOP 5</span>
+                                    </div>
+                                    <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 space-y-1">
+                                        {rankingDown.length > 0 ? rankingDown.map((a, idx) => (
+                                            <button
+                                                key={`down-${a.id}`}
+                                                onClick={() => onPropertyClick(a.id)}
+                                                className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200"
+                                            >
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <span className="w-5 text-left text-[12px] font-black text-slate-400 tabular-nums">{idx + 1}</span>
+                                                    <span className="truncate text-[13px] font-bold text-slate-900">{a.name}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-[12px] font-black tabular-nums text-blue-600">
+                                                    <span>▼</span>
+                                                    <span>{Math.abs(a.changeRate).toFixed(1)}%</span>
+                                                </div>
+                                            </button>
+                                        )) : (
+                                            <div className="h-full flex items-center justify-center text-slate-400 text-[12px] font-medium">
+                                                데이터 없음
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* RIGHT COLUMN (Asset List) */}
-                <div className="col-span-5 h-full flex flex-col">
-                    <div className="bg-white rounded-[24px] p-8 border border-slate-200 shadow-soft flex flex-col h-full relative overflow-hidden">
+                <div className="col-span-4 h-full flex flex-col">
+                    <div className="bg-white rounded-[28px] p-10 border border-slate-200 shadow-soft flex flex-col h-full min-h-0 relative overflow-hidden">
                         <div className="flex items-center justify-between mb-6 px-1">
                             <h2 className="text-xl font-black text-slate-900 tracking-tight">자산 리스트</h2>
                             <button className="text-[13px] font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1.5 hover:bg-slate-50 p-2 rounded-lg transition-colors">
@@ -483,8 +613,10 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
         </div>
         
         {/* Mobile View remains largely the same but with style updates inherited */}
-        <div className="md:hidden min-h-screen bg-[#0f172a] pb-24 relative overflow-hidden">
-             <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-[#151b30] to-[#0f172a] z-0"></div>
+        <div className="md:hidden min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] pb-24 relative overflow-hidden">
+             <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-[#1e293b] via-[#0f172a] to-transparent z-0"></div>
+             <div className="absolute top-[20%] right-[-10%] w-[400px] h-[400px] glow-blue blur-[100px] pointer-events-none z-0"></div>
+             <div className="absolute bottom-[10%] left-[-10%] w-[300px] h-[300px] glow-cyan blur-[80px] pointer-events-none z-0"></div>
              
             <div className={`sticky top-0 z-40 transition-all duration-300 ${scrolled ? 'bg-[#0f172a]/80 backdrop-blur-xl py-3 shadow-lg border-b border-white/5' : 'bg-transparent py-6'} px-6`}>
                 <div className="flex justify-between items-center">
