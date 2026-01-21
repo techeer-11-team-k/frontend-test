@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronRight, Plus, MoreHorizontal, ArrowUpDown, Eye, EyeOff } from 'lucide-react';
+import { ChevronRight, Plus, MoreHorizontal, ArrowUpDown, Eye, EyeOff, X, Check } from 'lucide-react';
 import { Property, ViewProps } from '../../types';
 import { ProfessionalChart, ChartSeriesData } from '../ui/ProfessionalChart';
 import { Skeleton } from '../ui/Skeleton';
@@ -12,12 +12,73 @@ import { ProfileWidgetsCard } from '../ProfileWidgetsCard';
 // DATA & UTILS
 // ----------------------------------------------------------------------
 
-const generateAssetHistory = (startPrice: number, volatility: number) => {
+// Real apartment price data (approximate historical data in 만원)
+const realApartmentData: Record<string, { time: string; value: number }[]> = {
+    // 시흥 배곧 호반써밋 (2020년 4억 1천 → 2024년 4억 5천)
+    '시흥 배곧 호반써밋': (() => {
+        const data = [];
+        const startDate = new Date('2021-01-01');
+        const baseValues = [41000, 42000, 43500, 46000, 48000, 47000, 45500, 44000, 45000]; // 분기별 대략적 가격
+        for (let i = 0; i < 1100; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+            const quarterIndex = Math.min(Math.floor(i / 120), baseValues.length - 1);
+            const variation = (Math.random() - 0.5) * 500;
+            data.push({
+                time: date.toISOString().split('T')[0],
+                value: Math.floor(baseValues[quarterIndex] + variation),
+            });
+        }
+        return data;
+    })(),
+    // 김포 한강 센트럴자이 (2021년 4억 2천 → 2024년 3억 9천, 하락세)
+    '김포 한강 센트럴자이': (() => {
+        const data = [];
+        const startDate = new Date('2021-01-01');
+        const baseValues = [42000, 44000, 45000, 43000, 41000, 40000, 39500, 39000, 39000];
+        for (let i = 0; i < 1100; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+            const quarterIndex = Math.min(Math.floor(i / 120), baseValues.length - 1);
+            const variation = (Math.random() - 0.5) * 500;
+            data.push({
+                time: date.toISOString().split('T')[0],
+                value: Math.floor(baseValues[quarterIndex] + variation),
+            });
+        }
+        return data;
+    })(),
+    // 수원 영통 황골마을 (2019년 2억 8천 → 2024년 3억 2천)
+    '수원 영통 황골마을': (() => {
+        const data = [];
+        const startDate = new Date('2021-01-01');
+        const baseValues = [28000, 29000, 30000, 31500, 33000, 34000, 33000, 32000, 32000];
+        for (let i = 0; i < 1100; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+            const quarterIndex = Math.min(Math.floor(i / 120), baseValues.length - 1);
+            const variation = (Math.random() - 0.5) * 400;
+            data.push({
+                time: date.toISOString().split('T')[0],
+                value: Math.floor(baseValues[quarterIndex] + variation),
+            });
+        }
+        return data;
+    })(),
+};
+
+const generateAssetHistory = (startPrice: number, volatility: number, assetName?: string) => {
+    // If we have real data for this asset, use it
+    if (assetName && realApartmentData[assetName]) {
+        return realApartmentData[assetName];
+    }
+    
+    // Otherwise generate random data
     const data = [];
     let basePrice = startPrice; 
-    const startDate = new Date('2023-06-01');
+    const startDate = new Date('2021-01-01');
 
-    for (let i = 0; i < 300; i++) { 
+    for (let i = 0; i < 1100; i++) { 
         const change = (Math.random() - 0.48) * volatility;
         basePrice = basePrice + change;
         
@@ -47,18 +108,34 @@ const rawFav2Properties: Property[] = [
   { id: 'f2-2', name: '청주 지웰시티 1차', location: '청주시 흥덕구', area: 99, currentPrice: 62000, purchasePrice: 60000, purchaseDate: '-', changeRate: 3.3, jeonsePrice: 38000, gapPrice: 24000, jeonseRatio: 61.2 },
 ];
 
-// Helper for formatted price: Same Size, Bold Number, Medium Unit
+// Apartment images for random assignment
+const apartmentImages = [
+    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=100&h=100&fit=crop',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=100&h=100&fit=crop',
+    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=100&h=100&fit=crop',
+    'https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=100&h=100&fit=crop',
+    'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=100&h=100&fit=crop',
+    'https://images.unsplash.com/photo-1460317442991-0ec209397118?w=100&h=100&fit=crop',
+];
+
+const getApartmentImageUrl = (id: string) => {
+    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return apartmentImages[hash % apartmentImages.length];
+};
+
+// Convert sqm to pyeong
+const convertToPyeong = (sqm: number) => Math.round(sqm / 3.306);
+
+// Helper for formatted price: Same Size, Bold Number, NO Unit (만원 제거)
 const FormatPriceWithUnit = ({ value, isDiff = false }: { value: number, isDiff?: boolean }) => {
     const absVal = Math.abs(value);
     const eok = Math.floor(absVal / 10000);
     const man = absVal % 10000;
     
-    // For diff, if it's less than 1 eok, just show manwon
     if (isDiff && eok === 0) {
         return (
             <span className="tabular-nums tracking-tight">
                 <span className="font-bold">{man.toLocaleString()}</span>
-                <span className="font-medium opacity-70 ml-0.5">만원</span>
             </span>
         );
     }
@@ -68,20 +145,22 @@ const FormatPriceWithUnit = ({ value, isDiff = false }: { value: number, isDiff?
             <span className="font-bold">{eok}</span>
             <span className="font-medium opacity-70 ml-0.5 mr-1">억</span>
             {man > 0 && (
-                <>
-                    <span className="font-bold">{man.toLocaleString()}</span>
-                    <span className="font-medium opacity-70 ml-0.5">만원</span>
-                </>
+                <span className="font-bold">{man.toLocaleString()}</span>
             )}
         </span>
     );
 };
 
-// Simple text formatter for NumberTicker or strings
+// Simple text formatter for NumberTicker or strings (만원 제거)
 const formatPriceString = (v: number) => {
     const eok = Math.floor(v / 10000);
     const man = v % 10000;
-    return `${eok}억 ${man > 0 ? man.toLocaleString() : '0000'}만원`;
+    return `${eok}억 ${man > 0 ? man.toLocaleString() : '0,000'}`;
+};
+
+// Format price without 원 for comparison text
+const formatPriceWithoutWon = (v: number) => {
+    return v.toLocaleString();
 };
 
 // ----------------------------------------------------------------------
@@ -119,6 +198,8 @@ const AssetRow: React.FC<{
     onToggleVisibility: (e: React.MouseEvent) => void; 
 }> = ({ item, onClick, onToggleVisibility }) => {
     const isProfit = item.changeRate >= 0;
+    const imageUrl = getApartmentImageUrl(item.id);
+    const pyeong = convertToPyeong(item.area);
     
     return (
         <div 
@@ -135,11 +216,13 @@ const AssetRow: React.FC<{
                 </button>
 
                 <div className="relative flex-shrink-0">
-                     <div className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 transition-colors ${item.isVisible ? (isProfit ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600') : 'bg-slate-200 text-slate-400'}`}>
-                        <span className="text-[15px] font-bold tabular-nums tracking-tight leading-none">
-                            {isProfit ? '▲' : '▼'}
-                        </span>
-                        <span className="text-[11px] font-bold tabular-nums tracking-tighter mt-0.5">{Math.abs(item.changeRate)}%</span>
+                    {/* Apartment Image */}
+                    <div className={`w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 transition-opacity ${item.isVisible ? 'opacity-100' : 'opacity-50'}`}>
+                        <img 
+                            src={imageUrl} 
+                            alt={item.name} 
+                            className="w-full h-full object-cover"
+                        />
                     </div>
                     {item.isVisible && (
                         <div 
@@ -156,19 +239,19 @@ const AssetRow: React.FC<{
                     <div className="flex items-center gap-2 text-[13px] text-slate-500 truncate font-medium">
                         <span className="truncate">{item.location}</span>
                         <span className="w-px h-2.5 bg-slate-200 flex-shrink-0"></span>
-                        <span className="flex-shrink-0 tabular-nums">{item.area}㎡</span>
+                        <span className="flex-shrink-0 tabular-nums">{item.area}㎡ ({pyeong}평)</span>
                     </div>
                 </div>
             </div>
 
             <div className="flex items-center gap-4 flex-shrink-0 pl-2">
-                <div className="text-right">
-                    <p className={`font-bold text-[17px] md:text-lg tabular-nums tracking-tight ${item.isVisible ? 'text-slate-900' : 'text-slate-400'}`}>
+                <div className="text-right min-w-[120px]">
+                    <p className={`font-bold text-[17px] md:text-lg tabular-nums tracking-tight text-right ${item.isVisible ? 'text-slate-900' : 'text-slate-400'}`}>
                         <FormatPriceWithUnit value={item.currentPrice} />
                     </p>
                     {item.purchasePrice > 0 && (
-                        <p className={`text-[13px] mt-0.5 font-bold tabular-nums ${isProfit ? 'text-red-500' : 'text-blue-500'}`}>
-                            {isProfit ? '+' : '-'}<FormatPriceWithUnit value={item.currentPrice - item.purchasePrice} isDiff />
+                        <p className={`text-[13px] mt-0.5 font-bold tabular-nums text-right ${isProfit ? 'text-red-500' : 'text-blue-500'}`}>
+                            {isProfit ? '+' : '-'}<FormatPriceWithUnit value={Math.abs(item.currentPrice - item.purchasePrice)} isDiff /> ({Math.abs(item.changeRate)}%)
                         </p>
                     )}
                 </div>
@@ -186,13 +269,13 @@ const AssetRow: React.FC<{
 // ----------------------------------------------------------------------
 export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortfolio }) => {
   
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [assetGroups, setAssetGroups] = useState<AssetGroup[]>(() => {
       const mapToDashboardAsset = (raw: Property[], startIndex: number) => {
           return raw.map((p, idx) => ({
               ...p,
               isVisible: true,
-              chartData: generateAssetHistory(p.currentPrice, idx % 2 === 0 ? 500 : 1500),
+              chartData: generateAssetHistory(p.currentPrice, idx % 2 === 0 ? 500 : 1500, p.name),
               color: CHART_COLORS[(startIndex + idx) % CHART_COLORS.length]
           }));
       };
@@ -207,15 +290,27 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
   const [activeGroupId, setActiveGroupId] = useState<string>('my');
   const [viewMode, setViewMode] = useState<'separate' | 'combined'>('separate');
   const [sortOption, setSortOption] = useState<string>('currentPrice-desc');
-  const [rankingScope, setRankingScope] = useState<'mine' | 'national'>('mine');
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('1년');
   const [scrolled, setScrolled] = useState(false);
+  
+  // Edit mode states
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editingGroupName, setEditingGroupName] = useState('');
+  const [draggedGroupId, setDraggedGroupId] = useState<string | null>(null);
+  
+  // Add group modal
+  const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  
+  // Add apartment modal
+  const [isAddApartmentModalOpen, setIsAddApartmentModalOpen] = useState(false);
+  const [apartmentSearchQuery, setApartmentSearchQuery] = useState('');
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
     const handleScroll = () => { setScrolled(window.scrollY > 40); };
     window.addEventListener('scroll', handleScroll);
     return () => {
-        clearTimeout(timer);
         window.removeEventListener('scroll', handleScroll);
     }
   }, []);
@@ -235,6 +330,63 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
           };
       }));
   };
+  
+  // Drag and drop handlers
+  const handleDragStart = (groupId: string) => {
+      setDraggedGroupId(groupId);
+  };
+  
+  const handleDragOver = (e: React.DragEvent, groupId: string) => {
+      e.preventDefault();
+      if (draggedGroupId && draggedGroupId !== groupId) {
+          const draggedIndex = assetGroups.findIndex(g => g.id === draggedGroupId);
+          const targetIndex = assetGroups.findIndex(g => g.id === groupId);
+          if (draggedIndex !== -1 && targetIndex !== -1) {
+              const newGroups = [...assetGroups];
+              const [removed] = newGroups.splice(draggedIndex, 1);
+              newGroups.splice(targetIndex, 0, removed);
+              setAssetGroups(newGroups);
+          }
+      }
+  };
+  
+  const handleDragEnd = () => {
+      setDraggedGroupId(null);
+  };
+  
+  // Group management
+  const handleAddGroup = () => {
+      if (newGroupName.trim()) {
+          const newGroup: AssetGroup = {
+              id: `group-${Date.now()}`,
+              name: newGroupName.trim(),
+              assets: []
+          };
+          setAssetGroups(prev => [...prev, newGroup]);
+          setNewGroupName('');
+          setIsAddGroupModalOpen(false);
+          setActiveGroupId(newGroup.id);
+      }
+  };
+  
+  const handleDeleteGroup = (groupId: string) => {
+      if (assetGroups.length > 1) {
+          setAssetGroups(prev => prev.filter(g => g.id !== groupId));
+          if (activeGroupId === groupId) {
+              setActiveGroupId(assetGroups[0].id === groupId ? assetGroups[1].id : assetGroups[0].id);
+          }
+      }
+  };
+  
+  const handleRenameGroup = (groupId: string) => {
+      if (editingGroupName.trim()) {
+          setAssetGroups(prev => prev.map(g => 
+              g.id === groupId ? { ...g, name: editingGroupName.trim() } : g
+          ));
+      }
+      setEditingGroupId(null);
+      setEditingGroupName('');
+  };
 
   const activeGroup = assetGroups.find(g => g.id === activeGroupId) || assetGroups[0];
 
@@ -252,26 +404,29 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
       });
   }, [activeGroup.assets, sortOption]);
 
-  // Ranking data source
-  const rankingSourceAssets = useMemo(() => {
-      if (rankingScope === 'mine') return activeGroup.assets;
-      // "전국"은 데모 데이터이므로 모든 그룹의 자산을 합쳐 보여줍니다.
-      return assetGroups.flatMap(g => g.assets);
-  }, [rankingScope, activeGroup.assets, assetGroups]);
-
-  const rankingUp = useMemo(() => {
-      return [...rankingSourceAssets]
-          .filter(a => a.isVisible && a.changeRate > 0)
-          .sort((a, b) => b.changeRate - a.changeRate)
-          .slice(0, 5);
-  }, [rankingSourceAssets]);
-
-  const rankingDown = useMemo(() => {
-      return [...rankingSourceAssets]
-          .filter(a => a.isVisible && a.changeRate < 0)
-          .sort((a, b) => a.changeRate - b.changeRate) // more negative first
-          .slice(0, 5);
-  }, [rankingSourceAssets]);
+  // Filter data by period
+  const filterDataByPeriod = (data: { time: string; value: number }[]) => {
+      if (!data || data.length === 0) return data;
+      
+      const now = new Date('2024-12-15');
+      let startDate: Date;
+      
+      switch (selectedPeriod) {
+          case '1년':
+              startDate = new Date(now);
+              startDate.setFullYear(startDate.getFullYear() - 1);
+              break;
+          case '3년':
+              startDate = new Date(now);
+              startDate.setFullYear(startDate.getFullYear() - 3);
+              break;
+          case '전체':
+          default:
+              return data;
+      }
+      
+      return data.filter(d => new Date(d.time) >= startDate);
+  };
 
   const calculateAverageData = (assets: DashboardAsset[]) => {
       if (assets.length === 0) return [];
@@ -299,43 +454,121 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
       return { totalValue: currentSum, totalProfit: profit, totalProfitRate: profitRate };
   }, [activeGroup]);
 
+  // Period comparison calculation
+  const periodComparison = useMemo(() => {
+      const visibleAssets = activeGroup.assets.filter(a => a.isVisible);
+      if (visibleAssets.length === 0) return { amount: 0, rate: 0 };
+      
+      const avgData = calculateAverageData(visibleAssets);
+      const filteredData = filterDataByPeriod(avgData);
+      
+      if (filteredData.length < 2) return { amount: 0, rate: 0 };
+      
+      const startValue = filteredData[0].value;
+      const endValue = filteredData[filteredData.length - 1].value;
+      const diff = endValue - startValue;
+      const rate = startValue > 0 ? (diff / startValue) * 100 : 0;
+      
+      return { amount: diff, rate };
+  }, [activeGroup, selectedPeriod]);
+
   const chartSeries: ChartSeriesData[] = useMemo(() => {
       const visibleAssets = activeGroup.assets.filter(asset => asset.isVisible);
 
       if (viewMode === 'combined') {
           if (visibleAssets.length === 0) return [];
           const avgData = calculateAverageData(visibleAssets);
+          const filteredData = filterDataByPeriod(avgData);
           let color = '#ffffff'; 
-          if (avgData.length > 0) {
-              const start = avgData[0].value;
-              const end = avgData[avgData.length - 1].value;
+          if (filteredData.length > 0) {
+              const start = filteredData[0].value;
+              const end = filteredData[filteredData.length - 1].value;
               color = end >= start ? '#FF4B4B' : '#3182F6';
           }
-          return [{ name: `${activeGroup.name} 평균`, data: avgData, color: color, visible: true }];
+          return [{ name: `${activeGroup.name} 평균`, data: filteredData, color: color, visible: true }];
       }
       return visibleAssets.map(asset => ({
-            name: asset.name, data: asset.chartData, color: asset.color, visible: true
+          name: viewMode === 'separate' ? '' : asset.name,
+          data: filterDataByPeriod(asset.chartData),
+          color: asset.color,
+          visible: true
       }));
-  }, [activeGroup, viewMode]);
+  }, [activeGroup, viewMode, selectedPeriod]);
+
+  // Sample apartments for add modal
+  const sampleApartments = [
+      { id: 'apt1', name: '반포 래미안 원베일리', location: '서울시 서초구', area: 84, price: 450000, changeRate: 2.9 },
+      { id: 'apt2', name: '개포 자이 프레지던스', location: '서울시 강남구', area: 59, price: 280000, changeRate: 1.5 },
+      { id: 'apt3', name: '송도 더샵 센트럴파크', location: '인천시 연수구', area: 99, price: 120000, changeRate: -1.2 },
+      { id: 'apt4', name: '압구정 현대 힐스테이트', location: '서울시 강남구', area: 84, price: 520000, changeRate: 3.1 },
+      { id: 'apt5', name: '잠실 롯데캐슬 골드', location: '서울시 송파구', area: 84, price: 380000, changeRate: 2.2 },
+  ];
+
+  const filteredApartments = useMemo(() => {
+      if (!apartmentSearchQuery.trim()) return sampleApartments;
+      return sampleApartments.filter(apt => 
+          apt.name.toLowerCase().includes(apartmentSearchQuery.toLowerCase()) ||
+          apt.location.toLowerCase().includes(apartmentSearchQuery.toLowerCase())
+      );
+  }, [apartmentSearchQuery]);
 
   const ControlsContent = () => (
       <>
         {/* Tabs */}
-        <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-3 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-3 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300">
             {assetGroups.map((group) => (
-                <button 
+                <div
                     key={group.id}
-                    onClick={() => handleTabChange(group.id)}
-                    className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all whitespace-nowrap border ${
-                        activeGroupId === group.id 
-                        ? 'bg-deep-900 text-white border-deep-900 shadow-sm' 
-                        : 'bg-white text-slate-500 hover:bg-slate-50 border-slate-200'
-                    }`}
+                    draggable={isEditMode}
+                    onDragStart={() => handleDragStart(group.id)}
+                    onDragOver={(e) => handleDragOver(e, group.id)}
+                    onDragEnd={handleDragEnd}
+                    className={`relative flex items-center gap-1 ${
+                        draggedGroupId === group.id ? 'opacity-50' : ''
+                    } ${isEditMode ? 'cursor-grab active:cursor-grabbing' : ''}`}
                 >
-                    {group.name}
-                </button>
+                    {isEditMode && editingGroupId === group.id ? (
+                        <input
+                            type="text"
+                            value={editingGroupName}
+                            onChange={(e) => setEditingGroupName(e.target.value)}
+                            onBlur={() => handleRenameGroup(group.id)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleRenameGroup(group.id)}
+                            className="px-3 py-2 rounded-lg text-[15px] font-bold border-2 border-blue-500 focus:outline-none w-28"
+                            autoFocus
+                        />
+                    ) : (
+                        <button 
+                            onClick={() => isEditMode ? null : handleTabChange(group.id)}
+                            onDoubleClick={() => {
+                                if (isEditMode) {
+                                    setEditingGroupId(group.id);
+                                    setEditingGroupName(group.name);
+                                }
+                            }}
+                            className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all whitespace-nowrap border ${
+                                activeGroupId === group.id 
+                                ? 'bg-deep-900 text-white border-deep-900 shadow-sm' 
+                                : 'bg-white text-slate-500 hover:bg-slate-50 border-slate-200'
+                            } ${isEditMode ? 'pr-8' : ''}`}
+                        >
+                            {group.name}
+                        </button>
+                    )}
+                    {isEditMode && editingGroupId !== group.id && assetGroups.length > 1 && (
+                        <button
+                            onClick={() => handleDeleteGroup(group.id)}
+                            className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600 transition-colors shadow-sm"
+                        >
+                            <X className="w-3 h-3" />
+                        </button>
+                    )}
+                </div>
             ))}
-            <button className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm flex-shrink-0">
+            <button 
+                onClick={() => setIsAddGroupModalOpen(true)}
+                className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm flex-shrink-0"
+            >
                 <Plus className="w-5 h-5" />
             </button>
         </div>
@@ -367,7 +600,7 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                         : 'text-slate-400 hover:text-slate-600'
                     }`}
                 >
-                    따로 보기
+                    개별 보기
                 </button>
                 <button
                     onClick={() => handleViewModeChange('combined')}
@@ -377,7 +610,7 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                         : 'text-slate-400 hover:text-slate-600'
                     }`}
                 >
-                    같이 보기
+                    모아 보기
                 </button>
             </div>
         </div>
@@ -386,111 +619,177 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
 
   return (
     <div className="relative">
-        {/* PC Layout - Restored */}
-        <div className="hidden md:flex flex-col gap-8 pb-24">
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-12 gap-8">
-                {/* Left: Profile & Widgets Card - Reduced width */}
-                <div className="col-span-2">
-                    <ProfileWidgetsCard />
-                </div>
-                
-                {/* Right: Main Content Area - Increased width */}
-                <div className="col-span-10">
-                    <div className="grid grid-cols-12 gap-8">
-                        {/* Top Row: Asset List and Chart */}
-                        <div className="col-span-12 grid grid-cols-12 gap-8 min-h-[600px]">
-                            {/* LEFT COLUMN (Asset List) - Increased width */}
-                            <div className="col-span-5 h-full flex flex-col">
-                    <div className="bg-white rounded-[28px] p-10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100/80 flex flex-col h-full min-h-0 relative overflow-hidden">
-                        <div className="flex items-center justify-between mb-6 px-1">
-                            <h2 className="text-xl font-black text-slate-900 tracking-tight">자산 리스트</h2>
-                            <button className="text-[13px] font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1.5 hover:bg-slate-50 p-2 rounded-lg transition-colors">
-                                <MoreHorizontal className="w-4 h-4" /> 편집
-                            </button>
-                        </div>
-                        
-                        <ControlsContent />
-
-                        <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar -mr-2 pr-2 mt-2">
-                             {isLoading ? (
-                                [1,2,3,4].map(i => <Skeleton key={i} className="h-24 w-full rounded-2xl" />)
-                             ) : (
-                                sortedAssets.length > 0 ? (
-                                    sortedAssets.map(prop => (
-                                        <AssetRow 
-                                            key={prop.id} 
-                                            item={prop} 
-                                            onClick={() => onPropertyClick(prop.id)}
-                                            onToggleVisibility={(e) => toggleAssetVisibility(activeGroup.id, prop.id, e)}
-                                        />
-                                    ))
-                                ) : (
-                                    <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-2">
-                                        <Plus className="w-8 h-8 opacity-20" />
-                                        <p className="text-[15px] font-medium">등록된 자산이 없습니다.</p>
-                                    </div>
-                                )
-                             )}
-                        </div>
-
-                        <button className="w-full mt-6 py-4 rounded-xl border border-dashed border-slate-300 text-slate-500 font-bold hover:bg-slate-50 hover:text-slate-900 hover:border-slate-900 transition-all flex items-center justify-center gap-2 flex-shrink-0 active:scale-95 text-[15px]">
-                            <Plus className="w-4 h-4" /> {activeGroup.name}에 추가하기
+        {/* Add Group Modal */}
+        {isAddGroupModalOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsAddGroupModalOpen(false)}></div>
+                <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+                    <h3 className="text-lg font-black text-slate-900 mb-4">새 관심 단지 추가</h3>
+                    <input
+                        type="text"
+                        value={newGroupName}
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddGroup()}
+                        placeholder="그룹 이름 입력"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[15px] font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                        autoFocus
+                    />
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setIsAddGroupModalOpen(false)}
+                            className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors"
+                        >
+                            취소
+                        </button>
+                        <button
+                            onClick={handleAddGroup}
+                            className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors"
+                        >
+                            추가
                         </button>
                     </div>
                 </div>
+            </div>
+        )}
 
-                            {/* RIGHT COLUMN (Chart) - Adjusted width */}
+        {/* Add Apartment Modal */}
+        {isAddApartmentModalOpen && (
+            <div 
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 pt-24"
+                onClick={() => setIsAddApartmentModalOpen(false)}
+            >
+                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+                <div 
+                    className="relative bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="p-6 border-b border-slate-100">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-black text-slate-900">아파트 추가</h3>
+                            <button 
+                                onClick={() => setIsAddApartmentModalOpen(false)}
+                                className="p-2 rounded-full hover:bg-slate-100 text-slate-400"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <input
+                            type="text"
+                            value={apartmentSearchQuery}
+                            onChange={(e) => setApartmentSearchQuery(e.target.value)}
+                            placeholder="아파트 이름 검색"
+                            className="w-full px-4 py-3 border border-slate-200 rounded-xl text-[15px] font-medium focus:outline-none focus:border-slate-300"
+                            autoFocus
+                        />
+                    </div>
+                    <div 
+                        className="flex-1 overflow-y-auto p-4 space-y-2 overscroll-contain"
+                        onWheel={(e) => e.stopPropagation()}
+                    >
+                        {filteredApartments.map((apt) => (
+                            <div 
+                                key={apt.id}
+                                className="flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors border border-slate-100"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-xl overflow-hidden">
+                                        <img 
+                                            src={getApartmentImageUrl(apt.id)} 
+                                            alt={apt.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-slate-900">{apt.name}</h4>
+                                        <p className="text-[13px] text-slate-500">{apt.location} · {apt.area}㎡ ({convertToPyeong(apt.area)}평)</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-bold text-slate-900">{Math.floor(apt.price / 10000)}억</p>
+                                    <p className={`text-[13px] font-bold ${apt.changeRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
+                                        {apt.changeRate >= 0 ? '+' : ''}{apt.changeRate}%
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* PC Layout */}
+        <div className="hidden md:flex flex-col gap-8 pb-24">
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-12 gap-8">
+                {/* Left: Profile & Widgets Card */}
+                <div className="col-span-2">
+                    <div className="sticky top-24">
+                        <ProfileWidgetsCard 
+                            activeGroupName={activeGroup.name}
+                            assets={activeGroup.assets}
+                        />
+                    </div>
+                </div>
+                
+                {/* Right: Main Content Area */}
+                <div className="col-span-10">
+                    <div className="grid grid-cols-12 gap-8">
+                        {/* Top Row: Chart and Asset List (SWAPPED) */}
+                        <div className="col-span-12 grid grid-cols-12 gap-8 min-h-[600px]">
+                            {/* LEFT COLUMN (Chart) */}
                             <div className="col-span-7 h-full flex flex-col gap-6">
                                 <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] bg-noise rounded-[28px] p-10 text-white shadow-deep relative overflow-hidden group flex flex-col flex-1 min-h-0 border border-white/5">
                                     <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] glow-blue blur-[120px] pointer-events-none"></div>
                                     <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] glow-cyan blur-[100px] pointer-events-none"></div>
 
                                     <div className="flex flex-col items-start mb-8 relative z-10">
-                                        <div className="flex items-start gap-2 mb-2 text-slate-400 text-[15px] font-bold uppercase tracking-wide">
-                                            {activeGroup.name}
+                                        <div className="flex items-center justify-between w-full mb-2">
+                                            <div className="text-slate-300 text-[17px] font-semibold uppercase tracking-wide">
+                                                내 자산
+                                            </div>
+                                            <button 
+                                                onClick={onViewAllPortfolio}
+                                                className="flex items-center gap-2 text-[13px] font-bold transition-all bg-[#2a3a4f] hover:bg-[#3d5a80] text-white border border-white/10 px-5 py-2.5 rounded-full"
+                                            >
+                                                자산 분석 <ChevronRight className="w-3 h-3" />
+                                            </button>
                                         </div>
-                                        <div className="flex items-start gap-4">
+                                        <div className="flex items-start gap-4 w-full">
                                             {isLoading ? (
                                                 <Skeleton className="h-14 w-60 rounded-lg bg-white/10" />
                                             ) : (
-                                                <div className="flex flex-col items-start">
-                                                    <span className="text-[clamp(2.5rem,2.5vw,4rem)] font-black tracking-normal tabular-nums animate-enter leading-none -ml-[0.09em]">
+                                                <div className="flex flex-col items-start w-full">
+                                                    <span className="text-[clamp(2.5rem,2.5vw,4rem)] font-black tracking-normal tabular-nums leading-none -ml-[0.09em]">
                                                         <NumberTicker value={totalValue} formatter={formatPriceString} />
                                                     </span>
-                                                    <span className="mt-1 text-[16px] font-normal text-white/80">
-                                                        저번달 대비 {Math.abs(totalProfitRate).toFixed(1)}% 올랐어요
-                                                    </span>
+                                                    <div className="mt-1 flex items-center w-full">
+                                                        <span className="text-[16px] font-normal">
+                                                            <span className="text-white/70">{selectedPeriod} 전보다</span>
+                                                            <span className={`ml-1 ${periodComparison.amount >= 0 ? 'text-red-400' : 'text-blue-400'}`}>
+                                                                {periodComparison.amount >= 0 ? '+' : '-'}{formatPriceWithoutWon(Math.abs(periodComparison.amount))} ({Math.abs(periodComparison.rate).toFixed(1)}%)
+                                                            </span>
+                                                            <span className="text-slate-400 text-[11px] font-medium ml-2">(단위: 만원)</span>
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             )}
-                                            
-                                            {!isLoading && (
-                                                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md border ${totalProfit >= 0 ? 'bg-red-500/20 border-red-500/30 text-red-100' : 'bg-blue-500/20 border-blue-500/30 text-blue-100'} mt-1.5`}>
-                                                    <span className="text-lg font-bold tabular-nums">
-                                                        <FormatPriceWithUnit value={Math.abs(totalProfit)} isDiff />
-                                                    </span>
-                                                    <span className="text-[13px] font-medium opacity-80">({totalProfitRate.toFixed(1)}%)</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="absolute right-0 top-0 flex flex-col items-end gap-2">
-                                                <button 
-                                                onClick={onViewAllPortfolio}
-                                                className="flex items-center gap-2 text-[13px] font-bold text-white transition-all bg-white/10 hover:bg-brand-mint hover:text-deep-900 border border-white/20 px-5 py-2.5 rounded-full backdrop-blur-md group-hover:shadow-glow"
-                                            >
-                                                자산 분석 상세 <ChevronRight className="w-3 h-3" />
-                                            </button>
-                                            <span className="text-[11px] text-slate-500 font-medium">2024.12.15 기준</span>
                                         </div>
                                     </div>
 
                                     <div className="relative z-10 flex-1 flex flex-col">
-                                        <div className="flex justify-end gap-2 mb-4">
-                                            {['3개월', '6개월', '1년', '전체'].map(t => (
-                                                <button key={t} className={`text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm border transition-all ${t === '1년' ? 'bg-white text-deep-900 border-white shadow-neon-mint' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'}`}>
-                                                    {t}
-                                                </button>
-                                            ))}
+                                        <div className="flex flex-col items-end gap-1 mb-4">
+                                            <span className="text-[11px] text-slate-400 font-medium">2024.12 기준</span>
+                                            <div className="flex gap-2">
+                                                {['1년', '3년', '전체'].map(t => (
+                                                    <button 
+                                                        key={t} 
+                                                        onClick={() => setSelectedPeriod(t)}
+                                                        className={`text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm border transition-all ${t === selectedPeriod ? 'bg-white text-deep-900 border-white shadow-neon-mint' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'}`}
+                                                    >
+                                                        {t}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
                                         <div className="flex-1 w-full min-h-0">
                                             {isLoading ? (
@@ -500,16 +799,67 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                                                     series={chartSeries}
                                                     height={420} 
                                                     theme="dark"
+                                                    showHighLow={true}
                                                 />
                                             )}
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            {/* RIGHT COLUMN (Asset List) */}
+                            <div className="col-span-5 h-full flex flex-col">
+                                <div className="bg-white rounded-[28px] p-10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100/80 flex flex-col h-full min-h-0 relative overflow-hidden">
+                                    <div className="flex items-center justify-between mb-6 px-1">
+                                        <h2 className="text-xl font-black text-slate-900 tracking-tight">관심 리스트</h2>
+                                        <button 
+                                            onClick={() => setIsEditMode(!isEditMode)}
+                                            className={`text-[13px] font-bold flex items-center gap-1.5 p-2 rounded-lg transition-colors ${
+                                                isEditMode 
+                                                    ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' 
+                                                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                                            }`}
+                                        >
+                                            {isEditMode ? <Check className="w-4 h-4" /> : <MoreHorizontal className="w-4 h-4" />} {isEditMode ? '완료' : '편집'}
+                                        </button>
+                                    </div>
+                                    
+                                    <ControlsContent />
+
+                                    <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar -mr-2 pr-2 mt-2">
+                                         {isLoading ? (
+                                            [1,2,3,4].map(i => <Skeleton key={i} className="h-24 w-full rounded-2xl" />)
+                                         ) : (
+                                            sortedAssets.length > 0 ? (
+                                                sortedAssets.map(prop => (
+                                                    <AssetRow 
+                                                        key={prop.id} 
+                                                        item={prop} 
+                                                        onClick={() => onPropertyClick(prop.id)}
+                                                        onToggleVisibility={(e) => toggleAssetVisibility(activeGroup.id, prop.id, e)}
+                                                    />
+                                                ))
+                                            ) : (
+                                                <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-2">
+                                                    <Plus className="w-8 h-8 opacity-20" />
+                                                    <p className="text-[15px] font-medium">등록된 자산이 없습니다.</p>
+                                                </div>
+                                            )
+                                         )}
+                                    </div>
+
+                                    <button 
+                                        onClick={() => setIsAddApartmentModalOpen(true)}
+                                        className="w-full mt-6 py-4 rounded-xl border border-dashed border-slate-300 text-slate-500 font-bold hover:bg-slate-50 hover:text-slate-900 hover:border-slate-900 transition-all flex items-center justify-center gap-2 flex-shrink-0 active:scale-95 text-[15px]"
+                                    >
+                                        <Plus className="w-4 h-4" /> {activeGroup.name}에 추가하기
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Bottom Row: Policy News & Region Comparison - Same gap as top row */}
+                    {/* Bottom Row: Policy News & Region Comparison */}
                     <div className="grid grid-cols-12 gap-8 mt-8">
                         <div className="col-span-7 h-[466px]">
                             <PolicyNewsList />
@@ -522,7 +872,7 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
             </div>
         </div>
         
-        {/* Mobile View remains largely the same but with style updates inherited */}
+        {/* Mobile View */}
         <div className="md:hidden min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] pb-24 relative overflow-hidden">
              <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-[#1e293b] via-[#0f172a] to-transparent z-0"></div>
              <div className="absolute top-[20%] right-[-10%] w-[400px] h-[400px] glow-blue blur-[100px] pointer-events-none z-0"></div>
@@ -552,7 +902,6 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                     </div>
                 </div>
             </div>
-            {/* Rest of mobile view... (inherits styles) */}
              <div className="px-2 h-[300px] mb-6 relative z-10">
                 {isLoading ? (
                     <div className="w-full h-full flex items-center justify-center">
