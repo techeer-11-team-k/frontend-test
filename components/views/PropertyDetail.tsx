@@ -7,6 +7,7 @@ interface PropertyDetailProps {
   propertyId: string;
   onBack: () => void;
   isCompact?: boolean;
+  isSidebar?: boolean;
 }
 
 type TabType = 'chart' | 'info';
@@ -32,7 +33,96 @@ const generateChartData = (type: ChartType) => {
     return data;
 };
 
-const detailData = {
+const propertyDataMap: Record<string, typeof detailData1> = {
+  '1': {
+    id: '1',
+    name: '래미안 원베일리',
+    location: '서울시 서초구 반포동',
+    currentPrice: 42500, 
+    diff: 4500, 
+    diffRate: 11.8,
+    jeonsePrice: 32000,
+    jeonseRatio: 75.3,
+    info: [
+      { label: '전용면적', value: '84.00㎡' },
+      { label: '공급면적', value: '114.00㎡' },
+      { label: '세대수', value: '892세대' },
+      { label: '총 주차대수', value: '1,200대 (세대당 1.3대)' },
+      { label: '사용승인일', value: '2015.03.20' },
+      { label: '건설사', value: '삼성물산(주)' },
+      { label: '난방', value: '지역난방' },
+      { label: '현관구조', value: '계단식' },
+    ],
+    transactions: [
+        { date: '24.03.20', floor: '25층', price: 42500, type: '매매' },
+        { date: '24.03.15', floor: '18층', price: 42000, type: '매매' },
+        { date: '24.03.10', floor: '12층', price: 41500, type: '매매' },
+        { date: '24.03.05', floor: '20층', price: 32000, type: '전세' },
+        { date: '24.02.28', floor: '15층', price: 41000, type: '매매' },
+        { date: '24.02.20', floor: '8층', price: 40000, type: '매매' },
+        { date: '24.02.15', floor: '22층', price: 31500, type: '전세' },
+        { date: '24.02.01', floor: '10층', price: 39500, type: '매매' },
+        { date: '24.01.28', floor: '5층', price: 38000, type: '매매' },
+        { date: '24.01.10', floor: '16층', price: 31000, type: '전세' },
+    ],
+    news: [
+        { title: "반포 한강뷰 아파트 가격 상승세 지속", source: "부동산경제", time: "2시간 전" },
+        { title: "서초구 전세가율 상승, 갭투자 관심 증가", source: "머니투데이", time: "5시간 전" },
+        { title: "래미안 원베일리 신고가 갱신", source: "한국경제", time: "1일 전" },
+    ],
+    neighbors: [
+        { name: '래미안 반포리버뷰', price: 45000, diff: 5.9 },
+        { name: '반포 힐스테이트', price: 48000, diff: 12.9 },
+        { name: '반포 자이', price: 41000, diff: -3.5 },
+        { name: '래미안 반포팰리스', price: 52000, diff: 22.4 },
+    ],
+  },
+  '2': {
+    id: '2',
+    name: '래미안 강남파크',
+    location: '서울시 강남구 역삼동',
+    currentPrice: 58300, 
+    diff: 4800, 
+    diffRate: 8.2,
+    jeonsePrice: 45000,
+    jeonseRatio: 77.2,
+    info: [
+      { label: '전용면적', value: '114.00㎡' },
+      { label: '공급면적', value: '152.00㎡' },
+      { label: '세대수', value: '1,234세대' },
+      { label: '총 주차대수', value: '1,800대 (세대당 1.5대)' },
+      { label: '사용승인일', value: '2018.06.15' },
+      { label: '건설사', value: '삼성물산(주)' },
+      { label: '난방', value: '지역난방' },
+      { label: '현관구조', value: '계단식' },
+    ],
+    transactions: [
+        { date: '24.03.22', floor: '30층', price: 58300, type: '매매' },
+        { date: '24.03.18', floor: '25층', price: 57500, type: '매매' },
+        { date: '24.03.12', floor: '20층', price: 57000, type: '매매' },
+        { date: '24.03.08', floor: '28층', price: 45000, type: '전세' },
+        { date: '24.02.28', floor: '15층', price: 56000, type: '매매' },
+        { date: '24.02.20', floor: '10층', price: 55000, type: '매매' },
+        { date: '24.02.15', floor: '22층', price: 44500, type: '전세' },
+        { date: '24.02.01', floor: '18층', price: 54000, type: '매매' },
+        { date: '24.01.28', floor: '8층', price: 53000, type: '매매' },
+        { date: '24.01.10', floor: '24층', price: 44000, type: '전세' },
+    ],
+    news: [
+        { title: "강남구 투기 규제지역 지정, 시장 영향 주목", source: "부동산경제", time: "1시간 전" },
+        { title: "역삼동 아파트 가격 상승세 둔화", source: "머니투데이", time: "4시간 전" },
+        { title: "래미안 강남파크 전세가율 상승", source: "한국경제", time: "1일 전" },
+    ],
+    neighbors: [
+        { name: '래미안 역삼', price: 56000, diff: -3.9 },
+        { name: '역삼 힐스테이트', price: 61000, diff: 4.6 },
+        { name: '역삼 자이', price: 55000, diff: -5.7 },
+        { name: '래미안 강남힐스', price: 65000, diff: 11.5 },
+    ],
+  }
+};
+
+const detailData1 = {
   id: '1',
   name: '수원 영통 황골마을 1단지',
   location: '경기도 수원시 영통구 영통동',
@@ -76,6 +166,10 @@ const detailData = {
   ],
 };
 
+const getDetailData = (propertyId: string) => {
+  return propertyDataMap[propertyId] || detailData1;
+};
+
 // Updated FormatPrice: Numbers Bold, Units Medium, Same Size
 const FormatPrice = ({ val, sizeClass = "text-[28px]" }: { val: number, sizeClass?: string }) => {
   const eok = Math.floor(val / 10000);
@@ -87,7 +181,6 @@ const FormatPrice = ({ val, sizeClass = "text-[28px]" }: { val: number, sizeClas
           {man > 0 && (
             <>
                 <span className="font-bold">{man.toLocaleString()}</span>
-                <span className="font-medium text-slate-600 ml-0.5">만원</span>
             </>
           )}
       </span>
@@ -132,124 +225,177 @@ const TransactionRow: React.FC<{ tx: typeof detailData.transactions[0] }> = ({ t
     );
 }
 
-export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBack, isCompact = false }) => {
+// 면적별 가격 데이터 생성 함수
+const getAreaBasedData = (basePrice: number, area: string) => {
+  const areaMultiplier: Record<string, number> = {
+    '84': 1.0,
+    '90': 1.15,
+    '102': 1.35,
+    '114': 1.55,
+  };
+  const multiplier = areaMultiplier[area] || 1.0;
+  return Math.floor(basePrice * multiplier);
+};
+
+// 면적별 거래 내역 생성 함수
+const generateAreaTransactions = (baseTransactions: typeof detailData1.transactions, area: string) => {
+  return baseTransactions.map(tx => ({
+    ...tx,
+    price: getAreaBasedData(tx.price, area),
+  }));
+};
+
+export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBack, isCompact = false, isSidebar = false }) => {
   const [activeTab, setActiveTab] = useState<TabType>('chart');
   const [chartType, setChartType] = useState<ChartType>('매매');
   const [chartData, setChartData] = useState(generateChartData('매매'));
   const [chartPeriod, setChartPeriod] = useState('1년');
   const [isFavorite, setIsFavorite] = useState(false);
   const [txFilter, setTxFilter] = useState<TransactionType>('전체');
+  const [selectedArea, setSelectedArea] = useState('84');
+
+  const detailData = getDetailData(propertyId);
+  
+  // 면적별 데이터 계산
+  const areaBasedPrice = getAreaBasedData(detailData.currentPrice, selectedArea);
+  const areaBasedDiff = getAreaBasedData(detailData.diff, selectedArea);
+  const areaBasedDiffRate = detailData.diffRate; // 비율은 동일
+  const areaBasedTransactions = generateAreaTransactions(detailData.transactions, selectedArea);
 
   useEffect(() => {
       setChartData(generateChartData(chartType));
   }, [chartType]);
 
-  const filteredTransactions = detailData.transactions.filter(tx => 
+  const filteredTransactions = areaBasedTransactions.filter(tx => 
       txFilter === '전체' ? true : tx.type === txFilter
   );
 
   return (
-    <div className={`bg-slate-50 min-h-full font-sans text-slate-900 ${isCompact ? 'p-0' : ''}`}>
+    <div className={`${isSidebar ? 'bg-transparent' : 'bg-slate-50'} min-h-full font-sans text-slate-900 ${isCompact ? 'p-0' : ''} ${isSidebar ? 'p-0' : ''}`}>
       
       {!isCompact && (
           <>
-            {/* Header / Nav */}
-            <div className="sticky top-0 z-[50] bg-white/90 backdrop-blur-md border-b border-slate-200">
-                <div className="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <button onClick={onBack} className="p-2 -ml-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
-                            <ArrowLeft className="w-5 h-5" />
-                        </button>
-                        <span className="text-[15px] font-bold text-slate-900">{detailData.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button 
-                            onClick={() => setIsFavorite(!isFavorite)}
-                            className={`p-2 rounded-lg transition-colors ${isFavorite ? 'bg-yellow-50 text-yellow-500' : 'text-slate-400 hover:bg-slate-100'}`}
-                        >
-                            <Star className={`w-5 h-5 ${isFavorite ? 'fill-yellow-500' : ''}`} />
-                        </button>
-                        <button className="bg-slate-900 text-white text-[13px] font-bold px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors shadow-sm">
-                            내 자산 추가
-                        </button>
-                    </div>
-                </div>
-            </div>
+            {!isSidebar && (
+              <>
+                {/* Header / Nav */}
+                <div className="sticky top-0 z-[50] bg-white/90 backdrop-blur-md border-b border-slate-200">
+                  <div className="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                          <button onClick={onBack} className="p-2 -ml-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
+                              <ArrowLeft className="w-5 h-5" />
+                          </button>
+                          <span className="text-[15px] font-bold text-slate-900">{detailData.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                          <button 
+                              onClick={() => setIsFavorite(!isFavorite)}
+                              className={`p-2 rounded-lg transition-colors ${isFavorite ? 'bg-yellow-50 text-yellow-500' : 'text-slate-400 hover:bg-slate-100'}`}
+                          >
+                              <Star className={`w-5 h-5 ${isFavorite ? 'fill-yellow-500' : ''}`} />
+                          </button>
+                          <button className="bg-slate-900 text-white text-[13px] font-bold px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors shadow-sm">
+                              내 자산 추가
+                          </button>
+                      </div>
+                  </div>
+              </div>
+              </>
+            )}
 
-            <div className="max-w-[1400px] mx-auto p-4 md:p-8 space-y-8">
+            <div className={`${isSidebar ? 'p-5 space-y-5' : 'max-w-[1400px] mx-auto p-4 md:p-8 space-y-8'}`}>
                 
                 {/* 1. Header Card: Refined Layout (Stock App Style) */}
-                <Card className="p-8 bg-white">
-                    {/* Top Row: Name & Badges */}
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="bg-slate-100 p-2 rounded-xl">
-                            <Building2 className="w-6 h-6 text-slate-700" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-black text-slate-900 leading-none mb-1">{detailData.name}</h1>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[13px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">아파트</span>
-                                <span className="text-[13px] font-medium text-slate-400">{detailData.id}</span>
-                            </div>
-                        </div>
-                    </div>
-
+                <Card className={`${isSidebar ? 'bg-transparent shadow-none border-0 p-5' : 'bg-white p-8'}`}>
                     {/* Middle Row: Big Price & Change */}
-                    <div className="mt-6 flex items-baseline gap-3">
-                        <FormatPrice val={detailData.currentPrice} sizeClass="text-[42px]" />
+                    <div className={`${isSidebar ? 'mt-0' : 'mt-6'} flex items-center gap-4 flex-wrap`}>
+                        <FormatPrice val={isSidebar ? areaBasedPrice : detailData.currentPrice} sizeClass={isSidebar ? "text-[32px]" : "text-[42px]"} />
                         
-                        <div className="flex flex-col items-start leading-none">
-                            <div className={`text-[15px] font-bold flex items-center gap-1 tabular-nums ${detailData.diffRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
-                                {detailData.diffRate >= 0 ? '▲' : '▼'} {Math.abs(detailData.diff)}만원 ({Math.abs(detailData.diffRate)}%)
+                        <div className="flex flex-col items-start leading-none" style={{ marginTop: isSidebar ? '-0.5rem' : '-0.5rem' }}>
+                            <div className={`${isSidebar ? 'text-[16px]' : 'text-[15px]'} font-bold flex items-center gap-1 tabular-nums ${areaBasedDiffRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
+                                {areaBasedDiffRate >= 0 ? '▲' : '▼'} {Math.abs(isSidebar ? areaBasedDiff : detailData.diff).toLocaleString()} ({Math.abs(areaBasedDiffRate)}%)
                             </div>
-                            <span className="text-[12px] font-medium text-slate-400 mt-1">지난 실거래가 대비</span>
+                            <span className={`${isSidebar ? 'text-[13px]' : 'text-[12px]'} font-medium text-slate-400 mt-0.5`}>지난 실거래가 대비</span>
                         </div>
                     </div>
 
                     {/* Divider */}
-                    <div className="h-px w-full bg-slate-100 my-6"></div>
+                    <div className={`h-px w-full bg-slate-100 ${isSidebar ? 'my-4' : 'my-6'}`}></div>
 
                     {/* Bottom Row: Info Specs */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[13px] font-bold text-slate-400">위치</span>
-                            <span className="text-[15px] font-bold text-slate-700 flex items-center gap-1 truncate">
-                                <MapPin className="w-3.5 h-3.5" /> {detailData.location}
+                    <div className={`grid ${isSidebar ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'} ${isSidebar ? 'gap-5' : 'gap-4'}`}>
+                        <div className="flex flex-col gap-1.5">
+                            <span className={`${isSidebar ? 'text-[15px]' : 'text-[13px]'} font-bold text-slate-400 flex items-center gap-1.5`}>
+                                위치
+                                <MapPin className={`${isSidebar ? 'w-3.5 h-3.5' : 'w-3 h-3'} text-slate-300`} />
+                            </span>
+                            <span className={`${isSidebar ? 'text-[17px]' : 'text-[15px]'} font-bold text-slate-700 truncate`}>
+                                {detailData.location}
                             </span>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[13px] font-bold text-slate-400">사용승인</span>
-                            <span className="text-[15px] font-bold text-slate-700 flex items-center gap-1">
-                                <Calendar className="w-3.5 h-3.5" /> 1997년 (27년차)
+                        <div className="flex flex-col gap-1.5">
+                            <span className={`${isSidebar ? 'text-[15px]' : 'text-[13px]'} font-bold text-slate-400 flex items-center gap-1.5`}>
+                                건축연도
+                                <Calendar className={`${isSidebar ? 'w-3.5 h-3.5' : 'w-3 h-3'} text-slate-300`} />
+                            </span>
+                            <span className={`${isSidebar ? 'text-[17px]' : 'text-[15px]'} font-bold text-slate-700`}>
+                                1997년 (27년차)
                             </span>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[13px] font-bold text-slate-400">세대수</span>
-                            <span className="text-[15px] font-bold text-slate-700 flex items-center gap-1">
-                                <Building2 className="w-3.5 h-3.5" /> 3,129세대
+                        <div className="flex flex-col gap-1.5">
+                            <span className={`${isSidebar ? 'text-[15px]' : 'text-[13px]'} font-bold text-slate-400 flex items-center gap-1.5`}>
+                                세대수
+                                <Building2 className={`${isSidebar ? 'w-3.5 h-3.5' : 'w-3 h-3'} text-slate-300`} />
+                            </span>
+                            <span className={`${isSidebar ? 'text-[17px]' : 'text-[15px]'} font-bold text-slate-700`}>
+                                3,129세대
                             </span>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[13px] font-bold text-slate-400">주차</span>
-                            <span className="text-[15px] font-bold text-slate-700 flex items-center gap-1">
-                                <Car className="w-3.5 h-3.5" /> 세대당 0.8대
+                        <div className="flex flex-col gap-1.5">
+                            <span className={`${isSidebar ? 'text-[15px]' : 'text-[13px]'} font-bold text-slate-400 flex items-center gap-1.5`}>
+                                주차
+                                <Car className={`${isSidebar ? 'w-3.5 h-3.5' : 'w-3 h-3'} text-slate-300`} />
+                            </span>
+                            <span className={`${isSidebar ? 'text-[17px]' : 'text-[15px]'} font-bold text-slate-700`}>
+                                세대당 0.8대
                             </span>
                         </div>
                     </div>
                 </Card>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    
-                    {/* 2. Chart Card */}
-                    <div className="lg:col-span-2 space-y-4">
-                        <Card className="p-6 bg-white min-h-[450px] flex flex-col">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
+                {isSidebar ? (
+                    <>
+                        {/* Sidebar Layout: Single Column */}
+                        <div className="space-y-4">
+                        {/* Area Tabs Container - Wraps all content below */}
+                        <div className="bg-white rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden">
+                            {/* Area Tabs */}
+                            <div className="flex bg-white rounded-t-xl p-1.5 gap-2 overflow-x-auto border-b border-slate-200/50">
+                                {['84', '90', '102', '114'].map(area => (
+                                    <button
+                                        key={area}
+                                        onClick={() => setSelectedArea(area)}
+                                        className={`${isSidebar ? 'px-4 py-2 text-[15px]' : 'px-4 py-2 text-[13px]'} font-bold rounded-lg transition-all whitespace-nowrap ${
+                                            selectedArea === area
+                                            ? 'bg-slate-900 text-white border border-slate-900 shadow-sm'
+                                            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border border-transparent'
+                                        }`}
+                                    >
+                                        {area}m²
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Content wrapped by area tabs */}
+                            <div className="p-5 space-y-4">
+                        {/* Chart - List Style */}
+                        <div className="bg-transparent flex flex-col">
+                            <div className={`flex items-center justify-between ${isSidebar ? 'mb-5' : 'mb-6'} flex-wrap gap-2`}>
+                                <div className="flex bg-slate-100/80 rounded-lg p-1 gap-1">
                                     {(['매매', '전세', '월세'] as ChartType[]).map(type => (
                                         <button
                                                 key={type}
                                                 onClick={() => setChartType(type)}
-                                                className={`px-4 py-1.5 text-[13px] font-bold rounded-md transition-all ${
+                                                className={`${isSidebar ? 'px-3 py-1.5 text-[13px]' : 'px-4 py-1.5 text-[13px]'} font-bold rounded-md transition-all ${
                                                     chartType === type
                                                     ? 'bg-white text-slate-900 shadow-sm'
                                                     : 'text-slate-400 hover:text-slate-600'
@@ -261,12 +407,12 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                                 </div>
                                 
                                 {/* Segmented Control for Period */}
-                                <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
+                                <div className="flex bg-slate-100/80 rounded-lg p-1 gap-1">
                                     {['1년', '3년', '전체'].map(p => (
                                         <button 
                                             key={p} 
                                             onClick={() => setChartPeriod(p)} 
-                                            className={`px-3 py-1.5 text-[12px] font-bold rounded-md transition-all ${
+                                            className={`${isSidebar ? 'px-3 py-1.5 text-[13px]' : 'px-3 py-1.5 text-[12px]'} font-bold rounded-md transition-all ${
                                                 chartPeriod === p 
                                                 ? 'bg-white text-slate-900 shadow-sm' 
                                                 : 'text-slate-400 hover:text-slate-600'
@@ -281,33 +427,21 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                             <div className="flex-1 w-full relative">
                                 <ProfessionalChart 
                                     data={chartData} 
-                                    height={320} 
+                                    height={isSidebar ? 240 : 320} 
                                     lineColor={chartType === '매매' ? '#3182F6' : (chartType === '전세' ? '#10b981' : '#f59e0b')}
                                     areaTopColor={chartType === '매매' ? 'rgba(49, 130, 246, 0.15)' : (chartType === '전세' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)')}
                                 />
                             </div>
-                        </Card>
-
-                        {/* Neighbors List */}
-                        <div className="">
-                            <h3 className="text-[17px] font-black text-slate-900 mb-4 px-1">주변 시세 비교</h3>
-                            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col divide-y divide-slate-50">
-                                {detailData.neighbors.map((item, i) => (
-                                    <NeighborItem key={i} item={item} currentPrice={detailData.currentPrice} />
-                                ))}
-                            </div>
                         </div>
-                    </div>
 
-                    {/* 3. Transaction Table & Info */}
-                    <div className="lg:col-span-1 space-y-8">
-                        <Card className="bg-white overflow-hidden flex flex-col h-[500px]">
-                            <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
-                                <h3 className="text-[16px] font-black text-slate-900">실거래 내역</h3>
+                        {/* Transaction Table - List Style */}
+                        <div className="bg-transparent overflow-hidden flex flex-col" style={{ maxHeight: isSidebar ? '360px' : '500px' }}>
+                            <div className={`${isSidebar ? 'pb-3' : 'pb-3'} border-b border-slate-200/50 flex justify-between items-center bg-transparent sticky top-0 z-10`}>
+                                <h3 className={`${isSidebar ? 'text-[19px]' : 'text-[16px]'} font-black text-slate-900`}>실거래 내역</h3>
                                 <select 
                                     value={txFilter}
                                     onChange={(e) => setTxFilter(e.target.value as TransactionType)}
-                                    className="text-[12px] font-bold bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 focus:ring-0 focus:border-slate-300"
+                                    className={`${isSidebar ? 'text-[14px]' : 'text-[11px]'} font-bold bg-white border border-slate-200 rounded-lg py-1.5 px-3 focus:ring-0 focus:border-slate-300`}
                                 >
                                     <option value="전체">전체</option>
                                     <option value="매매">매매</option>
@@ -315,46 +449,180 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                                 </select>
                             </div>
                             
-                            <div className="grid grid-cols-4 py-3 px-4 bg-slate-50/50 text-[12px] font-bold text-slate-500 border-b border-slate-100">
-                                <div className="pl-4">일자</div>
+                            <div className={`grid grid-cols-4 ${isSidebar ? 'py-3 px-0 text-[14px]' : 'py-3 px-0 text-[12px]'} font-bold text-slate-500 border-b border-slate-200/50 mt-3`}>
+                                <div className={isSidebar ? '' : ''}>일자</div>
                                 <div className="text-center">구분</div>
                                 <div className="text-center">층</div>
-                                <div className="text-right pr-4">거래액</div>
+                                <div className={`text-right ${isSidebar ? '' : ''}`}>거래액</div>
                             </div>
                             
                             <div className="flex-1 overflow-y-auto custom-scrollbar">
                                 {filteredTransactions.map((tx, i) => (
-                                    <TransactionRow key={i} tx={tx} />
+                                    <div key={i} className={`grid grid-cols-4 ${isSidebar ? 'py-3' : 'py-4'} text-[15px] border-b border-slate-100/50 last:border-0 hover:bg-slate-50/50 transition-colors items-center ${isSidebar ? 'h-[48px]' : 'h-[52px]'}`}>
+                                        <div className={`text-slate-500 ${isSidebar ? 'text-[14px]' : 'text-[12px]'} font-medium tabular-nums`}>{tx.date}</div>
+                                        <div className={`font-bold ${tx.type === '매매' ? 'text-slate-900' : (tx.type === '전세' ? 'text-indigo-600' : 'text-emerald-600')} text-center ${isSidebar ? 'text-[14px]' : 'text-[13px]'}`}>{tx.type}</div>
+                                        <div className={`text-slate-500 text-center ${isSidebar ? 'text-[14px]' : 'text-[12px]'} tabular-nums`}>{tx.floor}</div>
+                                        <div className={`text-right tabular-nums ${isSidebar ? '' : ''}`}>
+                                            <FormatPrice val={tx.price} sizeClass={isSidebar ? "text-[15px]" : "text-[15px]"} />
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
-                        </Card>
+                        </div>
 
-                        <Card className="bg-white overflow-hidden">
-                            <div className="p-5 border-b border-slate-100">
-                                <h3 className="text-[16px] font-black text-slate-900">단지 정보</h3>
+                        {/* Neighbors List - List Style (No Card) */}
+                        <div className="bg-transparent overflow-hidden">
+                            <div className={`${isSidebar ? 'pb-3' : 'pb-3'} border-b border-slate-200/50`}>
+                                <h3 className={`${isSidebar ? 'text-[19px]' : 'text-[17px]'} font-black text-slate-900`}>주변 시세 비교</h3>
                             </div>
-                            <div className="divide-y divide-slate-50">
+                            <div className="overflow-hidden flex flex-col divide-y divide-slate-100/50 mt-3">
+                                {detailData.neighbors.map((item, i) => (
+                                    <NeighborItem key={i} item={item} currentPrice={areaBasedPrice} />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Info List - List Style (No Card) */}
+                        <div className="bg-transparent overflow-hidden">
+                            <div className={`${isSidebar ? 'pb-3' : 'pb-3'} border-b border-slate-200/50`}>
+                                <h3 className={`${isSidebar ? 'text-[16px]' : 'text-[16px]'} font-black text-slate-900`}>단지 정보</h3>
+                            </div>
+                            <div className="divide-y divide-slate-100/50 mt-3">
                                 {detailData.info.map((info, i) => (
-                                    <div key={i} className="flex justify-between p-4 text-[14px]">
+                                    <div key={i} className={`flex justify-between ${isSidebar ? 'py-3 text-[15px]' : 'py-3 text-[14px]'}`}>
                                         <span className="font-medium text-slate-500">{info.label}</span>
                                         <span className="font-bold text-slate-900 text-right">{info.value}</span>
                                     </div>
                                 ))}
                             </div>
-                        </Card>
+                        </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    </>
+                ) : (
+                    <>
+                        {/* Full Layout: Multi Column */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        
+                        {/* 2. Chart Card */}
+                        <div className="lg:col-span-2 space-y-4">
+                            <Card className="p-6 bg-white min-h-[450px] flex flex-col">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
+                                        {(['매매', '전세', '월세'] as ChartType[]).map(type => (
+                                            <button
+                                                    key={type}
+                                                    onClick={() => setChartType(type)}
+                                                    className={`px-4 py-1.5 text-[13px] font-bold rounded-md transition-all ${
+                                                        chartType === type
+                                                        ? 'bg-white text-slate-900 shadow-sm'
+                                                        : 'text-slate-400 hover:text-slate-600'
+                                                    }`}
+                                            >
+                                                {type}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    
+                                    {/* Segmented Control for Period */}
+                                    <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
+                                        {['1년', '3년', '전체'].map(p => (
+                                            <button 
+                                                key={p} 
+                                                onClick={() => setChartPeriod(p)} 
+                                                className={`px-3 py-1.5 text-[12px] font-bold rounded-md transition-all ${
+                                                    chartPeriod === p 
+                                                    ? 'bg-white text-slate-900 shadow-sm' 
+                                                    : 'text-slate-400 hover:text-slate-600'
+                                                }`}
+                                            >
+                                                {p}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 w-full relative">
+                                    <ProfessionalChart 
+                                        data={chartData} 
+                                        height={320} 
+                                        lineColor={chartType === '매매' ? '#3182F6' : (chartType === '전세' ? '#10b981' : '#f59e0b')}
+                                        areaTopColor={chartType === '매매' ? 'rgba(49, 130, 246, 0.15)' : (chartType === '전세' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)')}
+                                    />
+                                </div>
+                            </Card>
+
+                            {/* Neighbors List */}
+                            <div className="">
+                                <h3 className="text-[17px] font-black text-slate-900 mb-4 px-1">주변 시세 비교</h3>
+                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col divide-y divide-slate-50">
+                                    {detailData.neighbors.map((item, i) => (
+                                        <NeighborItem key={i} item={item} currentPrice={detailData.currentPrice} />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 3. Transaction Table & Info */}
+                        <div className="lg:col-span-1 space-y-8">
+                            <Card className="bg-white overflow-hidden flex flex-col h-[500px]">
+                                <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                                    <h3 className="text-[16px] font-black text-slate-900">실거래 내역</h3>
+                                    <select 
+                                        value={txFilter}
+                                        onChange={(e) => setTxFilter(e.target.value as TransactionType)}
+                                        className="text-[12px] font-bold bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 focus:ring-0 focus:border-slate-300"
+                                    >
+                                        <option value="전체">전체</option>
+                                        <option value="매매">매매</option>
+                                        <option value="전세">전세</option>
+                                    </select>
+                                </div>
+                                
+                                <div className="grid grid-cols-4 py-3 px-4 bg-slate-50/50 text-[12px] font-bold text-slate-500 border-b border-slate-100">
+                                    <div className="pl-4">일자</div>
+                                    <div className="text-center">구분</div>
+                                    <div className="text-center">층</div>
+                                    <div className="text-right pr-4">거래액</div>
+                                </div>
+                                
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                    {filteredTransactions.map((tx, i) => (
+                                        <TransactionRow key={i} tx={tx} />
+                                    ))}
+                                </div>
+                            </Card>
+
+                            <Card className="bg-white overflow-hidden">
+                                <div className="p-5 border-b border-slate-100">
+                                    <h3 className="text-[16px] font-black text-slate-900">단지 정보</h3>
+                                </div>
+                                <div className="divide-y divide-slate-50">
+                                    {detailData.info.map((info, i) => (
+                                        <div key={i} className="flex justify-between p-4 text-[14px]">
+                                            <span className="font-medium text-slate-500">{info.label}</span>
+                                            <span className="font-bold text-slate-900 text-right">{info.value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </Card>
+                        </div>
+                    </div>
+                    </>
+                )}
             </div>
           </>
       )}
 
       {isCompact && (
-          // Compact View for Map Side Panel
-          <div className="px-5 py-4 bg-white border-b border-slate-100">
+          <>
+              {/* Compact View for Map Side Panel */}
+              <div className="px-5 py-4 bg-white border-b border-slate-100">
                <div className="flex flex-col gap-1">
                     <FormatPrice val={detailData.currentPrice} sizeClass="text-2xl" />
                     <span className={`text-[15px] font-bold flex items-center tabular-nums ${detailData.diffRate >= 0 ? 'text-red-600' : 'text-blue-600'}`}>
-                        {detailData.diffRate >= 0 ? '▲' : '▼'} {Math.abs(detailData.diff)}만원 ({Math.abs(detailData.diffRate)}%)
+                        {detailData.diffRate >= 0 ? '▲' : '▼'} {Math.abs(detailData.diff)} ({Math.abs(detailData.diffRate)}%)
                     </span>
                </div>
                
@@ -392,7 +660,8 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                        ))}
                    </div>
                )}
-          </div>
+              </div>
+          </>
       )}
     </div>
   );
