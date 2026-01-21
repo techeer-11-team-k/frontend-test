@@ -8,6 +8,7 @@ import { HousingDemand } from './components/views/HousingDemand';
 import { HousingSupply } from './components/views/HousingSupply';
 import { PropertyDetail } from './components/views/PropertyDetail';
 import { PortfolioList } from './components/views/PortfolioList';
+import { Ranking } from './components/views/Ranking';
 import { ViewType } from './types';
 
 type StatsCategory = 'demand' | 'supply' | 'ranking';
