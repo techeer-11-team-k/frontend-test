@@ -663,11 +663,11 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                                 </div>
                             </Card>
 
-                            <Card className="bg-white overflow-hidden">
-                                <div className="p-5 border-b border-slate-100">
+                            <Card className="bg-white overflow-hidden flex flex-col h-[400px]">
+                                <div className="p-5 border-b border-slate-100 flex-shrink-0">
                                     <h3 className="text-[16px] font-black text-slate-900">단지 정보</h3>
                                 </div>
-                                <div className="divide-y divide-slate-50">
+                                <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-50" style={{ scrollbarGutter: 'stable' }}>
                                     {detailData.info.map((info, i) => (
                                         <div key={i} className="flex justify-between p-4 text-[14px]">
                                             <span className="font-medium text-slate-500">{info.label}</span>
