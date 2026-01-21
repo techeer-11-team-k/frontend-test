@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '../ui/Card';
-import { Search, Download, ChevronDown, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Download, ChevronDown, Calendar } from 'lucide-react';
 
 interface HousingSupplyItem {
   moveInDate: string; // YYYYMM 형식
@@ -89,8 +89,6 @@ export const HousingSupply: React.FC = () => {
   const [selectedRegion, setSelectedRegion] = useState('전체');
   const [selectedBusinessType, setSelectedBusinessType] = useState<'전체' | '분양' | '임대'>('전체');
   const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
   const regionDropdownRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -127,20 +125,7 @@ export const HousingSupply: React.FC = () => {
     }
     
     setFilteredData(filtered);
-    setCurrentPage(1); // 필터 변경 시 첫 페이지로 리셋
   }, [data, selectedRegion, selectedBusinessType, searchTerm]);
-  
-  // 페이지네이션 계산
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredData.slice(startIndex, endIndex);
-  }, [filteredData, currentPage, itemsPerPage]);
-  
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
   
   const formatDate = (dateStr: string): string => {
     if (dateStr.length === 6) {
@@ -336,7 +321,7 @@ export const HousingSupply: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((item, index) => (
+              {filteredData.map((item, index) => (
                 <tr
                   key={index}
                   className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
@@ -373,102 +358,6 @@ export const HousingSupply: React.FC = () => {
         {filteredData.length === 0 && (
           <div className="p-12 text-center">
             <p className="text-slate-400 font-bold">검색 결과가 없습니다.</p>
-          </div>
-        )}
-        
-        {/* 페이지네이션 */}
-        {filteredData.length > itemsPerPage && (
-          <div className="p-6 border-t border-slate-100 flex items-center justify-between">
-            <div className="text-[14px] font-bold text-slate-600">
-              전체 {filteredData.length}건 중 {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredData.length)}건 표시
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`p-2 rounded-lg border transition-colors ${
-                  currentPage === 1
-                    ? 'border-slate-200 text-slate-300 cursor-not-allowed'
-                    : 'border-slate-200 text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              
-              {(() => {
-                const pages: (number | string)[] = [];
-                
-                // 페이지 번호 생성 로직
-                if (totalPages <= 7) {
-                  // 페이지가 7개 이하면 모두 표시
-                  for (let i = 1; i <= totalPages; i++) {
-                    pages.push(i);
-                  }
-                } else {
-                  // 첫 페이지
-                  pages.push(1);
-                  
-                  if (currentPage <= 4) {
-                    // 현재 페이지가 앞쪽에 있으면
-                    for (let i = 2; i <= 5; i++) {
-                      pages.push(i);
-                    }
-                    pages.push('...');
-                    pages.push(totalPages);
-                  } else if (currentPage >= totalPages - 3) {
-                    // 현재 페이지가 뒤쪽에 있으면
-                    pages.push('...');
-                    for (let i = totalPages - 4; i <= totalPages; i++) {
-                      pages.push(i);
-                    }
-                  } else {
-                    // 현재 페이지가 중간에 있으면
-                    pages.push('...');
-                    for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-                      pages.push(i);
-                    }
-                    pages.push('...');
-                    pages.push(totalPages);
-                  }
-                }
-                
-                return pages.map((page, index) => {
-                  if (page === '...') {
-                    return (
-                      <span key={`ellipsis-${index}`} className="px-2 text-slate-400">
-                        ...
-                      </span>
-                    );
-                  }
-                  
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page as number)}
-                      className={`px-3 py-2 rounded-lg text-[14px] font-bold transition-colors ${
-                        currentPage === page
-                          ? 'bg-brand-blue text-white'
-                          : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                });
-              })()}
-              
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`p-2 rounded-lg border transition-colors ${
-                  currentPage === totalPages
-                    ? 'border-slate-200 text-slate-300 cursor-not-allowed'
-                    : 'border-slate-200 text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
           </div>
         )}
       </Card>
