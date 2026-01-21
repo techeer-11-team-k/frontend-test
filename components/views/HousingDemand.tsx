@@ -5,10 +5,6 @@ import { ChevronDown } from 'lucide-react';
 import { HPIHeatmap } from '../ui/HPIHeatmap';
 import { MigrationSankey } from '../ui/MigrationSankey';
 
-// TODO: API 연동 시 이 부분을 API 호출로 대체
-// 예상 API 응답 형식:
-// - 연도별: { period: string, value: number }[]
-// - 월별: { period: string, [year: number]: number }[] (각 년도별 값이 포함된 객체 배열)
 // 연도별 거래량 더미 데이터
 const yearlyData = [
     { period: '2020', value: 1250 },
@@ -22,7 +18,6 @@ const yearlyData = [
 // 여러 년도의 월별 거래량 더미 데이터
 const generateMonthlyDataForYear = (year: number, baseValue: number) => {
     const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-    // 각 년도마다 약간 다른 패턴 생성
     const variations: { [key: number]: number[] } = {
         2021: [-5, -8, 5, 10, 12, 18, 15, 8, 3, 0, -3, -6],
         2022: [-3, -6, 6, 11, 14, 19, 17, 9, 4, 1, -2, -5],
@@ -39,20 +34,17 @@ const generateMonthlyDataForYear = (year: number, baseValue: number) => {
     }));
 };
 
-// 2021-2025년 월별 데이터 (미리 생성하여 고정)
 const monthlyData2021 = generateMonthlyDataForYear(2021, 120);
 const monthlyData2022 = generateMonthlyDataForYear(2022, 130);
 const monthlyData2023 = generateMonthlyDataForYear(2023, 140);
 const monthlyData2024 = generateMonthlyDataForYear(2024, 150);
 const monthlyData2025 = generateMonthlyDataForYear(2025, 160);
 
-// 년도별 색상 (과거일수록 옅게, 현재에 가까울수록 진하게)
 const getYearColor = (year: number, totalYears: number) => {
     const currentYear = 2025;
-    const yearIndex = currentYear - year; // 0이면 현재, 클수록 과거
-    // 과거일수록 opacity 낮게 (연하게), 현재에 가까울수록 opacity 높게 (진하게)
-    const opacity = 0.3 + ((totalYears - 1 - yearIndex) / (totalYears - 1)) * 0.7; // 0.3 ~ 1.0
-    return `rgba(49, 130, 246, ${opacity})`; // blue 계열
+    const yearIndex = currentYear - year;
+    const opacity = 0.3 + ((totalYears - 1 - yearIndex) / (totalYears - 1)) * 0.7;
+    return `rgba(49, 130, 246, ${opacity})`;
 };
 
 const marketPhases = [
@@ -81,14 +73,13 @@ const migrationData = [
     { name: '부산', value: -1500, label: '순유출' },
 ];
 
-export const Statistics: React.FC = () => {
+export const HousingDemand: React.FC = () => {
   const [viewMode, setViewMode] = useState<'yearly' | 'monthly'>('monthly');
   const [yearRange, setYearRange] = useState<2 | 3 | 5>(3);
   const [selectedRegion, setSelectedRegion] = useState('전국');
   const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState(false);
   const regionDropdownRef = useRef<HTMLDivElement>(null);
   
-  // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (regionDropdownRef.current && !regionDropdownRef.current.contains(event.target as Node)) {
@@ -101,11 +92,6 @@ export const Statistics: React.FC = () => {
     };
   }, []);
   
-  // TODO: API 연동 시 useEffect로 데이터 fetch
-  // 예: useEffect(() => { fetchYearlyData(); fetchMonthlyData(yearRange); }, [yearRange]);
-  
-  // 선택된 년도 범위에 따른 월별 데이터
-  // TODO: API 연동 시 이 함수를 API 호출로 대체하거나, API에서 받은 데이터를 변환하는 함수로 변경
   const getMonthlyDataByRange = () => {
     const currentYear = 2025;
     const years: number[] = [];
@@ -133,7 +119,6 @@ export const Statistics: React.FC = () => {
       else if (year === 2024) yearData = monthlyData2024;
       else if (year === 2025) yearData = monthlyData2025;
       else {
-        // 2021 이전 또는 2025 이후는 동적 생성
         const baseValue = 110 + (year - 2020) * 5;
         yearData = generateMonthlyDataForYear(year, baseValue);
       }
@@ -143,7 +128,6 @@ export const Statistics: React.FC = () => {
       });
     });
     
-    // 차트에 표시할 형식으로 변환
     return months.map(month => {
       const dataPoint: { period: string; [key: number]: number } = { period: month };
       years.forEach(year => {
@@ -160,18 +144,15 @@ export const Statistics: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-32 animate-fade-in px-4 md:px-0 pt-6">
-      
       <div className="md:hidden pt-2 pb-2">
         <h1 className="text-2xl font-black text-slate-900">통계</h1>
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 mb-6">
           <div>
-            <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
-                시장 심층 분석 
-                <span className="hidden md:inline-flex px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[13px] font-bold">Pro</span>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">
+                주택 수요
             </h2>
-            <p className="text-[15px] text-slate-500">빅데이터 기반 부동산 시장 흐름 분석</p>
           </div>
           <div className="flex gap-2">
               <div className="relative" ref={regionDropdownRef}>
@@ -211,7 +192,7 @@ export const Statistics: React.FC = () => {
           </div>
       </div>
 
-      {/* 1. 거래량 Chart */}
+      {/* 거래량 Chart */}
       <Card className="p-0 overflow-hidden border border-slate-200 shadow-soft bg-white">
           <div className="p-6 border-b border-slate-100">
               <div className="flex items-center justify-between mb-4">
@@ -222,7 +203,6 @@ export const Statistics: React.FC = () => {
                       </p>
                   </div>
                   <div className="flex items-center gap-3">
-                      {/* 탭 필터 */}
                       <div className="flex items-center bg-slate-100 rounded-lg p-1 gap-0">
                           <button
                               onClick={() => setViewMode('yearly')}
@@ -246,7 +226,6 @@ export const Statistics: React.FC = () => {
                           </button>
                       </div>
                       
-                      {/* 년도 범위 선택 (월별일 때만 표시) */}
                       {viewMode === 'monthly' && (
                           <div className="flex items-center bg-slate-100 rounded-lg p-1 gap-0">
                               <button
@@ -324,7 +303,7 @@ export const Statistics: React.FC = () => {
                           activeDot={{r: 5, fill: '#3182F6', stroke: '#fff', strokeWidth: 2}} 
                       />
                     ) : (
-                      monthlyYears.map((year, index) => {
+                      monthlyYears.map((year) => {
                         const color = getYearColor(year, monthlyYears.length);
                         return (
                           <Line 
@@ -343,7 +322,6 @@ export const Statistics: React.FC = () => {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              {/* 범례 (월별일 때만) */}
               {viewMode === 'monthly' && monthlyYears.length > 0 && (
                 <div className="flex items-center justify-center gap-4 mt-4">
                   {monthlyYears.map((year) => {
@@ -363,7 +341,7 @@ export const Statistics: React.FC = () => {
           </div>
       </Card>
 
-      {/* 2. Market Phases */}
+      {/* 시장 국면 분석 */}
       <Card className="p-0 overflow-hidden border border-slate-200 shadow-soft bg-white">
            <div className="p-6 border-b border-slate-100">
               <h3 className="font-black text-slate-900 text-[17px]">시장 국면 분석</h3>
@@ -392,7 +370,7 @@ export const Statistics: React.FC = () => {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 3. HPI */}
+          {/* HPI */}
           <Card className="p-0 overflow-hidden border border-slate-200 shadow-soft bg-white">
                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                   <div>
@@ -405,7 +383,7 @@ export const Statistics: React.FC = () => {
               </div>
           </Card>
 
-          {/* 4. Migration */}
+          {/* Migration */}
           <Card className="p-0 overflow-hidden border border-slate-200 shadow-soft bg-white">
                <div className="p-6 border-b border-slate-100">
                   <h3 className="font-black text-slate-900 text-[17px]">인구 순이동</h3>
