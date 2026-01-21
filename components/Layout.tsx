@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, Compass, ArrowRightLeft, PieChart, Bell, Search, LogOut, X, Sparkles } from 'lucide-react';
+import { Home, Compass, ArrowRightLeft, PieChart, Bell, Search, LogOut, X, Sparkles, Trophy } from 'lucide-react';
 import { ViewType, TabItem } from '../types';
 
 interface LayoutProps {
   children: React.ReactNode;
   currentView: ViewType;
   onChangeView: (view: ViewType) => void;
+  onStatsCategoryChange?: (category: 'demand' | 'supply' | 'ranking') => void;
   isDetailOpen?: boolean;
   isDockVisible?: boolean;
 }
@@ -15,6 +16,7 @@ const tabs: TabItem[] = [
   { id: 'map', label: '지도', icon: Compass },
   { id: 'compare', label: '비교', icon: ArrowRightLeft },
   { id: 'stats', label: '통계', icon: PieChart },
+  { id: 'ranking', label: '랭킹', icon: Trophy },
 ];
 
 const Logo = ({ className = "" }: { className?: string }) => (
@@ -133,14 +135,16 @@ const SearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
     );
 };
 
-export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeView, isDetailOpen = false, isDockVisible = true }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeView, onStatsCategoryChange, isDetailOpen = false, isDockVisible = true }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isStatsDropdownOpen, setIsStatsDropdownOpen] = useState(false);
   
   const isMapMode = currentView === 'map' && !isDetailOpen;
   const isDashboard = currentView === 'dashboard';
   const profileRef = useRef<HTMLDivElement>(null);
+  const statsDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -151,6 +155,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
+      }
+      if (statsDropdownRef.current && !statsDropdownRef.current.contains(event.target as Node)) {
+        setIsStatsDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -181,20 +188,72 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
               <Logo />
           </div>
           <nav className="flex gap-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => onChangeView(tab.id)}
-                className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
-                  currentView === tab.id 
-                    ? 'text-deep-900 bg-slate-200/50' 
-                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                <tab.icon size={19} strokeWidth={currentView === tab.id ? 2.5 : 2} />
-                {tab.label}
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              if (tab.id === 'stats') {
+                return (
+                  <div key={tab.id} className="relative" ref={statsDropdownRef}>
+                    <button
+                      onClick={() => setIsStatsDropdownOpen(!isStatsDropdownOpen)}
+                      className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
+                        currentView === tab.id 
+                          ? 'text-deep-900 bg-slate-200/50' 
+                          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                      }`}
+                    >
+                      <tab.icon size={19} strokeWidth={currentView === tab.id ? 2.5 : 2} />
+                      {tab.label}
+                    </button>
+                    
+                    {isStatsDropdownOpen && (
+                      <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-2xl shadow-deep border border-slate-200 p-2 animate-enter origin-top-left overflow-hidden z-50">
+                        <button
+                          onClick={() => {
+                            onStatsCategoryChange?.('demand');
+                            setIsStatsDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
+                        >
+                          주택 수요
+                        </button>
+                        <button
+                          onClick={() => {
+                            onStatsCategoryChange?.('supply');
+                            setIsStatsDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
+                        >
+                          주택 공급
+                        </button>
+                        <button
+                          onClick={() => {
+                            onStatsCategoryChange?.('ranking');
+                            setIsStatsDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
+                        >
+                          주택 랭킹
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => onChangeView(tab.id)}
+                  className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
+                    currentView === tab.id 
+                      ? 'text-deep-900 bg-slate-200/50' 
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <tab.icon size={19} strokeWidth={currentView === tab.id ? 2.5 : 2} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </nav>
         </div>
         <div className="flex items-center gap-3">
@@ -240,7 +299,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
         isMapMode 
           ? 'h-screen w-full p-0 md:pt-16 md:px-0' 
           : (isDashboard ? 'pt-0 md:pt-24 px-0 md:px-8' : 'pt-14 md:pt-24 px-4 md:px-8')
-      } ${isDashboard ? 'max-w-[1600px] 2xl:max-w-[1760px]' : 'max-w-[1400px]'} mx-auto min-h-screen relative`}>
+      } max-w-[1600px] 2xl:max-w-[1760px] mx-auto min-h-screen relative`}>
         
         {/* Mobile Header */}
         {isDashboard && !isDetailOpen && !isMapMode && (
