@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, Compass, ArrowRightLeft, PieChart, Bell, Search, LogOut, X, Sparkles, Trophy } from 'lucide-react';
+import { Home, Compass, ArrowRightLeft, PieChart, Bell, Search, LogOut, X, Sparkles } from 'lucide-react';
 import { ViewType, TabItem } from '../types';
 
 interface LayoutProps {
@@ -16,7 +16,6 @@ const tabs: TabItem[] = [
   { id: 'map', label: '지도', icon: Compass },
   { id: 'compare', label: '비교', icon: ArrowRightLeft },
   { id: 'stats', label: '통계', icon: PieChart },
-  { id: 'ranking', label: '랭킹', icon: Trophy },
 ];
 
 const Logo = ({ className = "" }: { className?: string }) => (
@@ -240,18 +239,18 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
               }
               
               return (
-                <button
-                  key={tab.id}
-                  onClick={() => onChangeView(tab.id)}
-                  className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
-                    currentView === tab.id 
-                      ? 'text-deep-900 bg-slate-200/50' 
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <tab.icon size={19} strokeWidth={currentView === tab.id ? 2.5 : 2} />
-                  {tab.label}
-                </button>
+              <button
+                key={tab.id}
+                onClick={() => onChangeView(tab.id)}
+                className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
+                  currentView === tab.id 
+                    ? 'text-deep-900 bg-slate-200/50' 
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <tab.icon size={19} strokeWidth={currentView === tab.id ? 2.5 : 2} />
+                {tab.label}
+              </button>
               );
             })}
           </nav>
