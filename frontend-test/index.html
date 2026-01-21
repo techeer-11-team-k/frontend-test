@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>스위트홈 - 프리미엄 부동산 자산 관리</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts: Pretendard (Sans) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Pretendard Variable"', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'sans-serif'],
+            },
+            colors: {
+              slate: {
+                50: '#F5F7FA', // Cool Gray Background
+                100: '#F0F2F5',
+                200: '#E5E8EB', // Border Color
+                300: '#D1D5DB',
+                400: '#9CA3AF', // Search Icon / Light Text
+                500: '#6B7280', // Label Text
+                600: '#4B5563',
+                700: '#374151',
+                800: '#1F2937',
+                900: '#111827', // Main Value Text
+              },
+              deep: {
+                900: '#0B1021',
+                800: '#151b30',
+                card: '#111827',
+              },
+              brand: {
+                mint: '#00F0FF',
+                coral: '#FF6B6B',
+                blue: '#3182F6', 
+                red: '#FF4B4B',
+              },
+              // Refined Sentiment Colors
+              red: {
+                50: '#FFF0F0', // Tint
+                100: '#FFE6E6',
+                400: '#FF6B6B',
+                500: '#F75555', // Soft Red
+                600: '#E04848',
+              },
+              blue: {
+                50: '#F0F6FF', // Tint
+                100: '#E2EFFF',
+                400: '#4B9BFF', // Toss Blue
+                500: '#3182F6', 
+                600: '#1B64DA',
+              }
+            },
+            boxShadow: {
+              'soft': '0 2px 8px rgba(0, 0, 0, 0.04)', // Very subtle
+              'sharp': '0 1px 2px 0 rgba(0, 0, 0, 0.05)', // Minimal
+              'deep': '0 10px 15px -3px rgba(0, 0, 0, 0.1)', 
+              'pop': '0 10px 40px -10px rgba(0, 0, 0, 0.3)', // Map Marker Pop
+              'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+              'glow': '0 0 20px rgba(49, 130, 246, 0.3)',
+              'neon-mint': '0 0 10px rgba(0, 240, 255, 0.3)',
+            },
+            animation: {
+              'enter': 'enter 0.3s ease-out forwards',
+              'fade-in': 'fadeIn 0.2s ease-out forwards',
+              'slide-up': 'slideUp 0.3s ease-out forwards',
+              'marquee': 'marquee 30s linear infinite',
+            },
+            keyframes: {
+              enter: {
+                '0%': { opacity: '0.8', transform: 'scale(0.99) translateY(4px)' },
+                '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+              },
+              fadeIn: {
+                '0%': { opacity: '0.8' },
+                '100%': { opacity: '1' },
+              },
+              slideUp: {
+                '0%': { opacity: '0.8', transform: 'translateY(8px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              slideDown: {
+                '0%': { opacity: '0.8', transform: 'translateY(-8px) scale(0.99)' },
+                '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+              },
+              marquee: {
+                '0%': { transform: 'translateX(0)' },
+                '100%': { transform: 'translateX(-50%)' },
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Pretendard Variable', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #111827;
+      }
+
+      /* Modern Mesh Gradient Background - CryptoMind style */
+      .mesh-gradient-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: 
+          radial-gradient(1200px circle at 50% 40%, rgba(248, 250, 252, 0.8) 0%, transparent 60%),
+          radial-gradient(900px circle at 70% 10%, rgba(147, 197, 253, 0.15) 0%, transparent 55%), 
+          radial-gradient(800px circle at 30% 80%, rgba(196, 181, 253, 0.12) 0%, transparent 50%),
+          linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      }
+
+      .mesh-gradient-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+          radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+          radial-gradient(circle at 40% 70%, rgba(34, 197, 94, 0.05) 0%, transparent 50%),
+          radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.07) 0%, transparent 50%),
+          radial-gradient(circle at 10% 90%, rgba(147, 197, 253, 0.06) 0%, transparent 50%),
+          radial-gradient(circle at 50% 50%, rgba(196, 181, 253, 0.04) 0%, transparent 70%);
+      }
+
+      .mesh-gradient-bg::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+          radial-gradient(circle at 60% 40%, rgba(59, 130, 246, 0.06) 0%, transparent 40%),
+          radial-gradient(circle at 30% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 45%),
+          radial-gradient(circle at 70% 60%, rgba(34, 197, 94, 0.04) 0%, transparent 40%);
+      }
+
+      /* Noise Texture Class */
+      .bg-noise {
+        position: relative;
+        isolation: isolate;
+      }
+      .bg-noise::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        pointer-events: none;
+        border-radius: inherit;
+      }
+
+      /* Tabular Nums for Numbers (Financial Standard) */
+      .tabular-nums {
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.02em;
+      }
+
+      /* Scrollbar */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px; 
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(148, 163, 184, 0.3);
+        border-radius: 10px;
+      }
+
+      /* Thin scrollbar for tabs */
+      .scrollbar-thin::-webkit-scrollbar {
+        height: 3px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: rgba(148, 163, 184, 0.2);
+        border-radius: 10px;
+      }
+      .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+        background-color: rgba(148, 163, 184, 0.4);
+      }
+
+      /* Glass Utilities */
+      .glass-morphism {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+      }
+      
+      .glass-frosted {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid #E5E8EB;
+      }
+
+      .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+      }
+
+      /* Radial Gradients */
+      .bg-gradient-radial {
+        background-image: radial-gradient(circle, var(--tw-gradient-stops));
+      }
+      
+      .glow-blue {
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(147, 51, 234, 0.1) 50%, transparent 100%);
+      }
+      
+      .glow-cyan {
+        background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 100%);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "recharts": "https://esm.sh/recharts@^3.6.0",
+    "lightweight-charts": "https://esm.sh/lightweight-charts@4.1.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

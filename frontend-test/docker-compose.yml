@@ -1,0 +1,27 @@
+services:
+  # 개발 환경
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: sweethome-frontend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    profiles:
+      - dev
+
+  # 프로덕션 환경
+  frontend-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sweethome-frontend-prod
+    ports:
+      - "8080:80"
+    profiles:
+      - prod
