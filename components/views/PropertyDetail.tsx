@@ -512,7 +512,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                         
                         {/* 2. Chart Card */}
                         <div className="lg:col-span-2 space-y-4">
-                            <Card className="p-6 bg-white min-h-[450px] flex flex-col">
+                            <Card className="p-6 bg-white h-[500px] flex flex-col">
                                 <div className="flex items-center justify-between mb-6">
                                     <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
                                         {(['매매', '전세', '월세'] as ChartType[]).map(type => (
