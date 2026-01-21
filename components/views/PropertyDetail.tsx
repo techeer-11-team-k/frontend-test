@@ -124,10 +124,10 @@ const TransactionRow: React.FC<{ tx: typeof detailData.transactions[0] }> = ({ t
     
     return (
         <div className="grid grid-cols-4 py-4 px-5 text-[15px] border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors items-center h-[52px]">
-            <div className="text-slate-500 text-[15px] font-medium tabular-nums">{tx.date}</div>
+            <div className="text-slate-500 text-[15px] font-medium tabular-nums text-center">{tx.date}</div>
             <div className={`font-bold ${typeColor} text-center text-[15px]`}>{tx.type}</div>
             <div className="text-slate-500 text-center text-[15px] tabular-nums">{tx.floor}</div>
-            <div className="text-right tabular-nums">
+            <div className="text-center tabular-nums">
                 <FormatPrice val={tx.price} sizeClass="text-[15px]" />
             </div>
         </div>
@@ -221,7 +221,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
       {!isCompact && (
           <>
             {/* Header / Nav */}
-            <div className="sticky top-0 z-[50] bg-white/90 backdrop-blur-md border-b border-slate-200">
+            <div className="z-[50] bg-white/90 backdrop-blur-md border-b border-slate-200">
                 <div className="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <button onClick={onBack} className="p-2 -ml-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
@@ -256,7 +256,6 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                             <h1 className="text-2xl font-black text-slate-900 leading-none mb-1">{detailData.name}</h1>
                             <div className="flex items-center gap-2">
                                 <span className="text-[13px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">아파트</span>
-                                <span className="text-[13px] font-medium text-slate-400">{detailData.id}</span>
                             </div>
                         </div>
                     </div>
@@ -308,7 +307,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
                     {/* 2. Chart Card */}
-                    <div className="lg:col-span-2 space-y-4">
+                    <div className="lg:col-span-2 space-y-8">
                         <Card className="p-6 bg-white h-[500px] flex flex-col">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
@@ -385,10 +384,10 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                             </div>
                             
                             <div className="grid grid-cols-4 py-3 px-5 bg-slate-50/50 text-[12px] font-bold text-slate-500 border-b border-slate-100">
-                                <div>일자</div>
+                                <div className="text-center">일자</div>
                                 <div className="text-center">구분</div>
                                 <div className="text-center">층</div>
-                                <div className="text-right">거래액</div>
+                                <div className="text-center">거래액</div>
                             </div>
                             
                             <div className="flex-1 overflow-y-auto custom-scrollbar">
