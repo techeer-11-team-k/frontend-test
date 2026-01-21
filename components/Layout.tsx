@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, Compass, ArrowRightLeft, PieChart, Bell, Search, LogOut, X, Sparkles } from 'lucide-react';
+import { Home, Compass, ArrowRightLeft, PieChart, Bell, Search, LogOut, X, Sparkles, Trophy } from 'lucide-react';
 import { ViewType, TabItem } from '../types';
 
 interface LayoutProps {
@@ -15,6 +15,7 @@ const tabs: TabItem[] = [
   { id: 'map', label: '지도', icon: Compass },
   { id: 'compare', label: '비교', icon: ArrowRightLeft },
   { id: 'stats', label: '통계', icon: PieChart },
+  { id: 'ranking', label: '랭킹', icon: Trophy },
 ];
 
 const Logo = ({ className = "" }: { className?: string }) => (

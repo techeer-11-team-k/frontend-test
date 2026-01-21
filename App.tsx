@@ -6,6 +6,7 @@ import { Comparison } from './components/views/Comparison';
 import { Statistics } from './components/views/Statistics';
 import { PropertyDetail } from './components/views/PropertyDetail';
 import { PortfolioList } from './components/views/PortfolioList';
+import { Ranking } from './components/views/Ranking';
 import { ViewType } from './types';
 
 function App() {
@@ -64,6 +65,8 @@ function App() {
         return <Comparison />;
       case 'stats':
         return <Statistics />;
+      case 'ranking':
+        return <Ranking onPropertyClick={handlePropertyClick} />;
       default:
         return <Dashboard onPropertyClick={handlePropertyClick} onViewAllPortfolio={handleViewAllPortfolio} />;
     }
