@@ -85,11 +85,8 @@ function App() {
         } else {
           return <HousingDemand />;
         }
-<<<<<<< HEAD
       case 'ranking':
         return <Ranking onPropertyClick={handlePropertyClick} />;
-=======
->>>>>>> 990b6f9ad4d9fe08490139b6a78dbecdba01a4d7
       default:
         return <Dashboard onPropertyClick={handlePropertyClick} onViewAllPortfolio={handleViewAllPortfolio} />;
     }
