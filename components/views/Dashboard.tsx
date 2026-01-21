@@ -120,7 +120,7 @@ const AssetRow: React.FC<{
     return (
         <div 
             onClick={onClick} 
-            className={`group flex items-center justify-between py-4 border-b border-slate-100 last:border-0 px-2 transition-all duration-300 cursor-pointer ${item.isVisible ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50'}`}
+            className={`group flex items-center justify-between py-4 border-b border-slate-100 last:border-0 px-2 transition-all duration-300 cursor-pointer rounded-2xl ${item.isVisible ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50'}`}
         >
             <div className="flex items-center gap-4">
                 {/* Eye Icon for Visibility Toggle */}
@@ -388,7 +388,7 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
             {/* Policy Banner (same width as the left main card: col-span-8) */}
             <div className="grid grid-cols-12 gap-12">
                 <div className="col-span-12">
-                    <div className="flex items-center gap-4 bg-white rounded-[28px] p-6 border border-slate-200 shadow-soft hover:shadow-deep transition-all">
+                    <div className="flex items-center gap-4 glass-card rounded-[28px] p-6 shadow-soft hover:shadow-deep transition-all">
                         <span className="flex-shrink-0 text-[12px] font-black text-white bg-brand-blue px-3 py-1 rounded-full">
                             정책
                         </span>
@@ -477,7 +477,7 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                     </div>
 
                     {/* Ranking Card (same width as the chart card because it's in the same left column) */}
-                    <div className="bg-white rounded-[28px] p-8 border border-slate-200 shadow-soft relative overflow-hidden flex-shrink-0 h-[220px]">
+                    <div className="glass-card rounded-[28px] p-8 shadow-soft relative overflow-hidden flex-shrink-0 h-[220px]">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-black text-slate-900 tracking-tight">Ranking</h3>
                             <div className="flex items-center gap-2">
@@ -572,7 +572,7 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
 
                 {/* RIGHT COLUMN (Asset List) */}
                 <div className="col-span-4 h-full flex flex-col">
-                    <div className="bg-white rounded-[28px] p-10 border border-slate-200 shadow-soft flex flex-col h-full min-h-0 relative overflow-hidden">
+                    <div className="glass-card rounded-[28px] p-10 shadow-soft flex flex-col h-full min-h-0 relative overflow-hidden">
                         <div className="flex items-center justify-between mb-6 px-1">
                             <h2 className="text-xl font-black text-slate-900 tracking-tight">자산 리스트</h2>
                             <button className="text-[13px] font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1.5 hover:bg-slate-50 p-2 rounded-lg transition-colors">
