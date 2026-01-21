@@ -1,59 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { Card } from '../ui/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, ReferenceLine, Cell } from 'recharts';
-import { ChevronDown } from 'lucide-react';
-import { HPIHeatmap } from '../ui/HPIHeatmap';
-import { MigrationSankey } from '../ui/MigrationSankey';
 
-// TODO: API 연동 시 이 부분을 API 호출로 대체
-// 예상 API 응답 형식:
-// - 연도별: { period: string, value: number }[]
-// - 월별: { period: string, [year: number]: number }[] (각 년도별 값이 포함된 객체 배열)
-// 연도별 거래량 더미 데이터
-const yearlyData = [
-    { period: '2020', value: 1250 },
-    { period: '2021', value: 1380 },
-    { period: '2022', value: 1520 },
-    { period: '2023', value: 1680 },
-    { period: '2024', value: 1750 },
-    { period: '2025', value: 1820 },
+const rvolData = [
+    { month: '25.01', value: 0.7 },
+    { month: '02', value: 1.15 },
+    { month: '03', value: 1.5 },
+    { month: '04', value: 1.25 },
+    { month: '05', value: 1.38 },
+    { month: '06', value: 1.65 },
+    { month: '07', value: 1.1 },
+    { month: '08', value: 1.05 },
+    { month: '09', value: 1.4 },
+    { month: '10', value: 1.42 },
+    { month: '11', value: 1.28 },
+    { month: '12', value: 1.20 },
 ];
-
-// 여러 년도의 월별 거래량 더미 데이터
-const generateMonthlyDataForYear = (year: number, baseValue: number) => {
-    const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-    // 각 년도마다 약간 다른 패턴 생성
-    const variations: { [key: number]: number[] } = {
-        2021: [-5, -8, 5, 10, 12, 18, 15, 8, 3, 0, -3, -6],
-        2022: [-3, -6, 6, 11, 14, 19, 17, 9, 4, 1, -2, -5],
-        2023: [0, -5, 8, 12, 15, 20, 18, 10, 5, 2, -2, -5],
-        2024: [2, -3, 10, 15, 18, 22, 20, 12, 7, 4, 0, -3],
-        2025: [5, 0, 12, 18, 20, 25, 22, 15, 10, 8, 5, 0],
-    };
-    const variation = variations[year] || variations[2023];
-    
-    return months.map((month, index) => ({
-        period: month,
-        value: Math.max(100, Math.round(baseValue + variation[index] + (Math.random() * 10 - 5))),
-        year: year,
-    }));
-};
-
-// 2021-2025년 월별 데이터 (미리 생성하여 고정)
-const monthlyData2021 = generateMonthlyDataForYear(2021, 120);
-const monthlyData2022 = generateMonthlyDataForYear(2022, 130);
-const monthlyData2023 = generateMonthlyDataForYear(2023, 140);
-const monthlyData2024 = generateMonthlyDataForYear(2024, 150);
-const monthlyData2025 = generateMonthlyDataForYear(2025, 160);
-
-// 년도별 색상 (과거일수록 옅게, 현재에 가까울수록 진하게)
-const getYearColor = (year: number, totalYears: number) => {
-    const currentYear = 2025;
-    const yearIndex = currentYear - year; // 0이면 현재, 클수록 과거
-    // 과거일수록 opacity 낮게 (연하게), 현재에 가까울수록 opacity 높게 (진하게)
-    const opacity = 0.3 + ((totalYears - 1 - yearIndex) / (totalYears - 1)) * 0.7; // 0.3 ~ 1.0
-    return `rgba(49, 130, 246, ${opacity})`; // blue 계열
-};
 
 const marketPhases = [
     { region: '서울 강남', phase: '상승기', trend: 'up', change: '+1.5%', color: 'text-brand-red', bg: 'bg-red-50' },
@@ -82,82 +44,6 @@ const migrationData = [
 ];
 
 export const Statistics: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'yearly' | 'monthly'>('monthly');
-  const [yearRange, setYearRange] = useState<2 | 3 | 5>(3);
-  const [selectedRegion, setSelectedRegion] = useState('전국');
-  const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState(false);
-  const regionDropdownRef = useRef<HTMLDivElement>(null);
-  
-  // 외부 클릭 시 드롭다운 닫기
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (regionDropdownRef.current && !regionDropdownRef.current.contains(event.target as Node)) {
-        setIsRegionDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-  
-  // TODO: API 연동 시 useEffect로 데이터 fetch
-  // 예: useEffect(() => { fetchYearlyData(); fetchMonthlyData(yearRange); }, [yearRange]);
-  
-  // 선택된 년도 범위에 따른 월별 데이터
-  // TODO: API 연동 시 이 함수를 API 호출로 대체하거나, API에서 받은 데이터를 변환하는 함수로 변경
-  const getMonthlyDataByRange = () => {
-    const currentYear = 2025;
-    const years: number[] = [];
-    
-    if (yearRange === 2) {
-      years.push(currentYear - 1, currentYear);
-    } else if (yearRange === 3) {
-      years.push(currentYear - 2, currentYear - 1, currentYear);
-    } else if (yearRange === 5) {
-      years.push(currentYear - 4, currentYear - 3, currentYear - 2, currentYear - 1, currentYear);
-    }
-    
-    const dataMap: { [key: string]: { [key: string]: number } } = {};
-    const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-    
-    months.forEach(month => {
-      dataMap[month] = {};
-    });
-    
-    years.forEach(year => {
-      let yearData;
-      if (year === 2021) yearData = monthlyData2021;
-      else if (year === 2022) yearData = monthlyData2022;
-      else if (year === 2023) yearData = monthlyData2023;
-      else if (year === 2024) yearData = monthlyData2024;
-      else if (year === 2025) yearData = monthlyData2025;
-      else {
-        // 2021 이전 또는 2025 이후는 동적 생성
-        const baseValue = 110 + (year - 2020) * 5;
-        yearData = generateMonthlyDataForYear(year, baseValue);
-      }
-      
-      yearData.forEach(item => {
-        dataMap[item.period][year] = Math.round(item.value);
-      });
-    });
-    
-    // 차트에 표시할 형식으로 변환
-    return months.map(month => {
-      const dataPoint: { period: string; [key: number]: number } = { period: month };
-      years.forEach(year => {
-        dataPoint[year] = dataMap[month][year];
-      });
-      return dataPoint;
-    });
-  };
-  
-  const currentData = viewMode === 'yearly' ? yearlyData : getMonthlyDataByRange();
-  const monthlyYears = viewMode === 'monthly' 
-    ? (yearRange === 2 ? [2024, 2025] : yearRange === 3 ? [2023, 2024, 2025] : [2021, 2022, 2023, 2024, 2025])
-    : [];
-
   return (
     <div className="space-y-8 pb-32 animate-fade-in px-4 md:px-0 pt-6">
       
@@ -174,123 +60,27 @@ export const Statistics: React.FC = () => {
             <p className="text-[15px] text-slate-500">빅데이터 기반 부동산 시장 흐름 분석</p>
           </div>
           <div className="flex gap-2">
-              <div className="relative" ref={regionDropdownRef}>
-                <button
-                  onClick={() => setIsRegionDropdownOpen(!isRegionDropdownOpen)}
-                  className="bg-white border border-slate-200 text-slate-700 text-[15px] rounded-lg focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 block px-4 py-2 shadow-sm font-bold hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 flex items-center gap-2 min-w-[140px] justify-between"
-                >
-                  <span>{selectedRegion}</span>
-                  <ChevronDown 
-                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                      isRegionDropdownOpen ? 'rotate-180' : ''
-                    }`} 
-                  />
-                </button>
-                
-                {isRegionDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-full bg-white rounded-xl shadow-deep border border-slate-200 overflow-hidden z-50 animate-enter origin-top-right">
-                    {['전국', '수도권', '지방 5대광역시'].map((region) => (
-                      <button
-                        key={region}
-                        onClick={() => {
-                          setSelectedRegion(region);
-                          setIsRegionDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-3 text-[14px] font-bold transition-colors ${
-                          selectedRegion === region
-                            ? 'bg-slate-100 text-slate-900'
-                            : 'text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        {region}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <select className="bg-white border border-slate-200 text-slate-700 text-[15px] rounded-lg focus:ring-slate-900 block p-2 shadow-sm font-bold">
+                <option>전국</option>
+                <option>수도권</option>
+                <option>지방 5대광역시</option>
+              </select>
           </div>
       </div>
 
-      {/* 1. 거래량 Chart */}
+      {/* 1. RVOL Chart */}
       <Card className="p-0 overflow-hidden border border-slate-200 shadow-soft bg-white">
           <div className="p-6 border-b border-slate-100">
-              <div className="flex items-center justify-between mb-4">
-                  <div>
-                      <h3 className="font-black text-slate-900 text-[17px]">거래량</h3>
-                      <p className="text-[13px] text-slate-500 font-medium mt-1">
-                          {viewMode === 'yearly' ? '연도별 거래량 추이' : '월별 거래량 추이'}
-                      </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                      {/* 탭 필터 */}
-                      <div className="flex items-center bg-slate-100 rounded-lg p-1 gap-0">
-                          <button
-                              onClick={() => setViewMode('yearly')}
-                              className={`px-4 py-2 rounded-md text-[13px] font-bold transition-all ${
-                                  viewMode === 'yearly'
-                                      ? 'bg-white text-slate-900'
-                                      : 'text-slate-500 hover:text-slate-700'
-                              }`}
-                          >
-                              연도별
-                          </button>
-                          <button
-                              onClick={() => setViewMode('monthly')}
-                              className={`px-4 py-2 rounded-md text-[13px] font-bold transition-all ${
-                                  viewMode === 'monthly'
-                                      ? 'bg-white text-slate-900'
-                                      : 'text-slate-500 hover:text-slate-700'
-                              }`}
-                          >
-                              월별
-                          </button>
-                      </div>
-                      
-                      {/* 년도 범위 선택 (월별일 때만 표시) */}
-                      {viewMode === 'monthly' && (
-                          <div className="flex items-center bg-slate-100 rounded-lg p-1 gap-0">
-                              <button
-                                  onClick={() => setYearRange(2)}
-                                  className={`px-3 py-2 rounded-md text-[12px] font-bold transition-all ${
-                                      yearRange === 2
-                                          ? 'bg-white text-slate-900'
-                                          : 'text-slate-500 hover:text-slate-700'
-                                  }`}
-                              >
-                                  2년
-                              </button>
-                              <button
-                                  onClick={() => setYearRange(3)}
-                                  className={`px-3 py-2 rounded-md text-[12px] font-bold transition-all ${
-                                      yearRange === 3
-                                          ? 'bg-white text-slate-900'
-                                          : 'text-slate-500 hover:text-slate-700'
-                                  }`}
-                              >
-                                  3년
-                              </button>
-                              <button
-                                  onClick={() => setYearRange(5)}
-                                  className={`px-3 py-2 rounded-md text-[12px] font-bold transition-all ${
-                                      yearRange === 5
-                                          ? 'bg-white text-slate-900'
-                                          : 'text-slate-500 hover:text-slate-700'
-                                  }`}
-                              >
-                                  5년
-                              </button>
-                          </div>
-                      )}
-                  </div>
-              </div>
+              <h3 className="font-black text-slate-900 text-[17px]">상대 거래량 (RVOL)</h3>
+              <p className="text-[13px] text-slate-500 font-medium mt-1">최근 12개월 평균 대비 거래량 강도 (1.0 이상: 활발)</p>
           </div>
           <div className="p-6 bg-gradient-to-b from-white to-slate-50/20">
               <div className="h-[280px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={currentData}>
+                  <LineChart data={rvolData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis 
-                        dataKey="period" 
+                        dataKey="month" 
                         axisLine={false} 
                         tickLine={false} 
                         tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 'bold' }} 
@@ -300,66 +90,25 @@ export const Statistics: React.FC = () => {
                         axisLine={false} 
                         tickLine={false} 
                         tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 'bold' }} 
-                        domain={['auto', 'auto']}
-                        tickFormatter={(value) => `${value.toLocaleString()}`}
+                        domain={[0.5, 'dataMax + 0.2']}
                     />
                     <Tooltip 
                         contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                         itemStyle={{ fontSize: '13px', fontWeight: 'bold', color: '#334155' }}
                         labelStyle={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}
-                        formatter={(value: number, name: string) => {
-                          if (viewMode === 'monthly') {
-                            return [`${value.toLocaleString()}건`, `${name}년`];
-                          }
-                          return [`${value.toLocaleString()}건`, '거래량'];
-                        }}
                     />
-                    {viewMode === 'yearly' ? (
-                      <Line 
-                          type="monotone" 
-                          dataKey="value" 
-                          stroke="#3182F6" 
-                          strokeWidth={2} 
-                          dot={{r: 3, strokeWidth: 2, fill: '#fff', stroke: '#3182F6'}} 
-                          activeDot={{r: 5, fill: '#3182F6', stroke: '#fff', strokeWidth: 2}} 
-                      />
-                    ) : (
-                      monthlyYears.map((year, index) => {
-                        const color = getYearColor(year, monthlyYears.length);
-                        return (
-                          <Line 
-                              key={year}
-                              type="monotone" 
-                              dataKey={year} 
-                              stroke={color}
-                              strokeWidth={2}
-                              dot={{r: 3, strokeWidth: 2, fill: '#fff', stroke: color}} 
-                              activeDot={{r: 5, fill: color, stroke: '#fff', strokeWidth: 2}}
-                              name={`${year}`}
-                          />
-                        );
-                      })
-                    )}
+                    <ReferenceLine y={1} stroke="#cbd5e1" strokeDasharray="3 3" />
+                    <Line 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#3182F6" 
+                        strokeWidth={2} 
+                        dot={{r: 3, strokeWidth: 2, fill: '#fff', stroke: '#3182F6'}} 
+                        activeDot={{r: 5, fill: '#3182F6', stroke: '#fff', strokeWidth: 2}} 
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              {/* 범례 (월별일 때만) */}
-              {viewMode === 'monthly' && monthlyYears.length > 0 && (
-                <div className="flex items-center justify-center gap-4 mt-4">
-                  {monthlyYears.map((year) => {
-                    const color = getYearColor(year, monthlyYears.length);
-                    return (
-                      <div key={year} className="flex items-center gap-2">
-                        <div 
-                          className="w-6 h-0.5 rounded"
-                          style={{ backgroundColor: color }}
-                        />
-                        <span className="text-[12px] font-bold text-slate-600">{year}년</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
           </div>
       </Card>
 
@@ -400,8 +149,20 @@ export const Statistics: React.FC = () => {
                     <p className="text-[13px] text-slate-500 mt-1 font-medium">2025.03 기준</p>
                   </div>
               </div>
-              <div className="p-6">
-                  <HPIHeatmap data={hpiData} />
+              <div className="p-5 grid grid-cols-2 gap-4 bg-slate-50/30">
+                  {hpiData.map((region, idx) => (
+                      <div key={idx} className={`p-5 rounded-xl border bg-white ${region.isPositive ? 'border-red-100' : 'border-blue-100'} hover:shadow-sm transition-shadow`}>
+                          <div className="flex justify-between items-start mb-2">
+                              <span className="text-[13px] font-bold text-slate-500">{region.name}</span>
+                          </div>
+                          <div className="flex items-baseline justify-between">
+                              <span className="text-xl font-black text-slate-800 tabular-nums">{region.value}</span>
+                              <span className={`text-[14px] font-bold tabular-nums ${region.isPositive ? 'text-brand-red' : 'text-brand-blue'}`}>
+                                  {region.isPositive ? '+' : ''}{region.change}%
+                              </span>
+                          </div>
+                      </div>
+                  ))}
               </div>
           </Card>
 
@@ -411,8 +172,35 @@ export const Statistics: React.FC = () => {
                   <h3 className="font-black text-slate-900 text-[17px]">인구 순이동</h3>
                   <p className="text-[13px] text-slate-500 mt-1 font-medium">최근 3개월 지역별 인구 전입/전출</p>
               </div>
-              <div className="p-6 h-[400px]">
-                  <MigrationSankey data={migrationData} />
+              <div className="p-6 h-[320px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                      <BarChart 
+                        layout="vertical" 
+                        data={migrationData} 
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                          <XAxis type="number" hide />
+                          <YAxis 
+                            dataKey="name" 
+                            type="category" 
+                            tick={{ fontSize: 13, fontWeight: 'bold', fill: '#475569' }} 
+                            axisLine={false} 
+                            tickLine={false} 
+                            width={40}
+                          />
+                          <Tooltip 
+                            cursor={{fill: '#f8fafc'}}
+                            contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                          />
+                          <ReferenceLine x={0} stroke="#cbd5e1" />
+                          <Bar dataKey="value" barSize={20} radius={[4, 4, 4, 4]}>
+                              {migrationData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.value > 0 ? '#f59e0b' : '#3182F6'} />
+                              ))}
+                          </Bar>
+                      </BarChart>
+                  </ResponsiveContainer>
               </div>
           </Card>
       </div>

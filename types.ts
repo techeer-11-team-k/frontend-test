@@ -22,7 +22,7 @@ export interface ChartDataPoint {
   value2?: number; // Optional for comparison
 }
 
-export type ViewType = 'dashboard' | 'map' | 'compare' | 'stats' | 'portfolio' | 'ranking';
+export type ViewType = 'dashboard' | 'map' | 'compare' | 'stats' | 'portfolio';
 
 export interface TabItem {
   id: ViewType;

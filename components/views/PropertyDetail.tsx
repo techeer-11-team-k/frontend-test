@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Star, Plus, ArrowRightLeft, Building2, MapPin, Calendar, Car, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Star, Plus, ArrowRightLeft, Building2, MapPin, Calendar, Car } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { ProfessionalChart } from '../ui/ProfessionalChart';
 
@@ -12,7 +12,7 @@ interface PropertyDetailProps {
 
 type TabType = 'chart' | 'info';
 type ChartType = '매매' | '전세' | '월세';
-type TransactionType = '전체' | '매매' | '전/월세';
+type TransactionType = '전체' | '매매' | '전세' | '월세';
 
 const generateChartData = (type: ChartType) => {
     const data = [];
@@ -174,16 +174,6 @@ const getDetailData = (propertyId: string) => {
 const FormatPrice = ({ val, sizeClass = "text-[28px]" }: { val: number, sizeClass?: string }) => {
   const eok = Math.floor(val / 10000);
   const man = val % 10000;
-  
-  if (eok === 0) {
-    // 1억 미만인 경우
-    return (
-      <span className={`tabular-nums tracking-tight text-slate-900 ${sizeClass}`}>
-        <span className="font-bold">{man.toLocaleString()}</span>
-      </span>
-    );
-  }
-  
   return (
       <span className={`tabular-nums tracking-tight text-slate-900 ${sizeClass}`}>
           <span className="font-bold">{eok}</span>
@@ -202,15 +192,20 @@ const NeighborItem: React.FC<{ item: typeof detailData.neighbors[0], currentPric
     const isHigher = diffRatio > 0;
     
     return (
-        <div className="flex justify-between p-4 text-[15px]">
-            <span className="font-medium text-slate-500">
-                {item.name} <span className={`text-[15px] font-bold px-1.5 py-0.5 rounded ${isHigher ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
-                    {isHigher ? '비쌈' : '저렴'} {Math.abs(diffRatio).toFixed(1)}%
-                </span>
-            </span>
-            <span className="font-bold text-slate-900 text-right tabular-nums">
-                <FormatPrice val={item.price} sizeClass="text-[15px]" />
-            </span>
+        <div className="flex items-center justify-between p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50 cursor-pointer transition-colors bg-white">
+            <div>
+                <div className="flex items-center gap-3 flex-wrap mb-1">
+                    <p className="text-[15px] font-bold text-slate-900">{item.name}</p>
+                    <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${isHigher ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+                        {isHigher ? '비쌈' : '저렴'} {Math.abs(diffRatio).toFixed(1)}%
+                    </span>
+                </div>
+            </div>
+            <div className="text-right flex-shrink-0">
+                <p className="text-[15px] font-bold text-slate-900 tabular-nums">
+                    <FormatPrice val={item.price} sizeClass="text-[15px]" />
+                </p>
+            </div>
         </div>
     );
 };
@@ -219,11 +214,11 @@ const TransactionRow: React.FC<{ tx: typeof detailData.transactions[0] }> = ({ t
     const typeColor = tx.type === '매매' ? 'text-slate-900' : (tx.type === '전세' ? 'text-indigo-600' : 'text-emerald-600');
     
     return (
-        <div className="grid grid-cols-4 py-4 px-5 text-[15px] border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors items-center h-[52px]">
-            <div className="text-slate-500 text-[15px] font-medium tabular-nums text-center">{tx.date}</div>
-            <div className={`font-bold ${typeColor} text-center text-[15px]`}>{tx.type}</div>
-            <div className="text-slate-500 text-center text-[15px] tabular-nums">{tx.floor}</div>
-            <div className="text-center tabular-nums">
+        <div className="grid grid-cols-4 py-4 text-[15px] border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors items-center h-[52px]">
+            <div className="text-slate-500 pl-4 text-[12px] font-medium tabular-nums">{tx.date}</div>
+            <div className={`font-bold ${typeColor} text-center text-[13px]`}>{tx.type}</div>
+            <div className="text-slate-500 text-center text-[12px] tabular-nums">{tx.floor}</div>
+            <div className="text-right tabular-nums pr-4">
                 <FormatPrice val={tx.price} sizeClass="text-[15px]" />
             </div>
         </div>
@@ -512,7 +507,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                         
                         {/* 2. Chart Card */}
                         <div className="lg:col-span-2 space-y-4">
-                            <Card className="p-6 bg-white h-[500px] flex flex-col">
+                            <Card className="p-6 bg-white min-h-[450px] flex flex-col">
                                 <div className="flex items-center justify-between mb-6">
                                     <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
                                         {(['매매', '전세', '월세'] as ChartType[]).map(type => (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface ComparisonData {
   region: string;
@@ -21,7 +21,7 @@ export const RegionComparisonChart: React.FC = () => {
         <p className="text-[13px] text-slate-500 font-medium">내 단지 상승률 vs 해당 행정구역 평균 상승률</p>
       </div>
       
-      <div className="h-[320px]">
+      <div className="h-[260px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={mockData}
@@ -34,9 +34,8 @@ export const RegionComparisonChart: React.FC = () => {
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: '#64748b', fontWeight: 'bold' }}
-              angle={-15}
-              textAnchor="end"
-              height={80}
+              textAnchor="middle"
+              height={50}
             />
             <YAxis 
               axisLine={false}
@@ -54,15 +53,6 @@ export const RegionComparisonChart: React.FC = () => {
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
               }}
               formatter={(value: number) => [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, '']}
-            />
-            <Legend 
-              wrapperStyle={{ paddingTop: '20px' }}
-              iconType="circle"
-              formatter={(value) => (
-                <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>
-                  {value === 'myProperty' ? '내 단지 상승률' : '행정구역 평균'}
-                </span>
-              )}
             />
             <Bar 
               dataKey="myProperty" 
@@ -114,6 +104,18 @@ export const RegionComparisonChart: React.FC = () => {
             </defs>
           </BarChart>
         </ResponsiveContainer>
+      </div>
+      
+      {/* Custom Legend - Below chart, Centered */}
+      <div className="flex items-center justify-center gap-8 mt-4 pt-4 border-t border-slate-100">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <span className="text-[13px] font-bold text-slate-600">내 단지 상승률</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+          <span className="text-[13px] font-bold text-slate-600">행정구역 평균</span>
+        </div>
       </div>
     </div>
   );

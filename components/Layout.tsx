@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, Compass, ArrowRightLeft, PieChart, Bell, Search, LogOut, X, Sparkles } from 'lucide-react';
+import { Home, Compass, ArrowRightLeft, PieChart, Search, LogOut, X, Sparkles, Moon, Sun, QrCode } from 'lucide-react';
 import { ViewType, TabItem } from '../types';
 
 interface LayoutProps {
   children: React.ReactNode;
   currentView: ViewType;
   onChangeView: (view: ViewType) => void;
-  onStatsCategoryChange?: (category: 'demand' | 'supply' | 'ranking') => void;
   isDetailOpen?: boolean;
   isDockVisible?: boolean;
 }
@@ -20,7 +19,7 @@ const tabs: TabItem[] = [
 
 const Logo = ({ className = "" }: { className?: string }) => (
     <div className={`flex items-center gap-2 ${className}`}>
-        <span className="text-2xl font-black tracking-tight text-deep-900 font-sans">SweetHome</span>
+        <span className="text-2xl font-black tracking-tight font-sans bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">SweetHome</span>
     </div>
 );
 
@@ -28,10 +27,24 @@ const Logo = ({ className = "" }: { className?: string }) => (
 const SearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
     const [isAiMode, setIsAiMode] = useState(false);
     
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center animate-fade-in p-4">
+        <div 
+            className="fixed inset-0 z-[100] flex items-center justify-center animate-fade-in p-4 pt-24 overflow-hidden"
+            onWheel={(e) => e.stopPropagation()}
+        >
             {/* Backdrop with Blur */}
             <div 
                 className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity" 
@@ -39,7 +52,7 @@ const SearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
             ></div>
 
             {/* Modal Container */}
-            <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[70vh]">
                 <div className="p-6">
                     {/* Search Header */}
                     <div className="flex items-center gap-4 mb-6">
@@ -48,7 +61,7 @@ const SearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                             <input 
                                 type="text" 
                                 placeholder={isAiMode ? "AI에게 부동산 질문을 해보세요..." : "지역, 아파트, 학교명 검색"} 
-                                className="flex-1 ml-3 bg-transparent border-none focus:ring-0 text-[17px] font-bold text-slate-900 placeholder:text-slate-400 h-full"
+                                className="flex-1 ml-3 bg-transparent border-none focus:outline-none focus:ring-0 text-[17px] font-bold text-slate-900 placeholder:text-slate-400 h-full"
                                 autoFocus
                             />
                             <button 
@@ -67,7 +80,10 @@ const SearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                     </div>
 
                     {/* Content - Scrollable */}
-                    <div className="space-y-8 overflow-y-auto max-h-[60vh] pr-2 custom-scrollbar">
+                    <div 
+                        className="space-y-8 overflow-y-auto max-h-[50vh] pr-2 custom-scrollbar overscroll-contain"
+                        onWheel={(e) => e.stopPropagation()}
+                    >
                         {/* Recent Searches */}
                         <section>
                             <h3 className="text-[15px] font-black text-slate-900 mb-3">최근 검색</h3>
@@ -134,16 +150,15 @@ const SearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
     );
 };
 
-export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeView, onStatsCategoryChange, isDetailOpen = false, isDockVisible = true }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeView, isDetailOpen = false, isDockVisible = true }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isStatsDropdownOpen, setIsStatsDropdownOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   
   const isMapMode = currentView === 'map' && !isDetailOpen;
   const isDashboard = currentView === 'dashboard';
   const profileRef = useRef<HTMLDivElement>(null);
-  const statsDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -154,9 +169,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
-      }
-      if (statsDropdownRef.current && !statsDropdownRef.current.contains(event.target as Node)) {
-        setIsStatsDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -172,100 +184,48 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
       {/* Mesh Gradient Background */}
       <div className="mesh-gradient-bg" />
       
-      <div className={`min-h-screen text-slate-900 selection:bg-brand-blue selection:text-white ${
-        isMapMode ? 'overflow-hidden' : ''
-      }`}>
+      <div className={`min-h-screen selection:bg-brand-blue selection:text-white ${
+        isDarkMode ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'
+      } ${isMapMode ? 'overflow-hidden' : ''}`}>
       
       <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
       {/* ----------------------------------------------------------------------
-          PC HEADER (Original Design - Restored)
+          PC HEADER
       ----------------------------------------------------------------------- */}
-      <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 items-center justify-between px-8 bg-white/95 backdrop-blur-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100/80 mx-8 mt-4 rounded-[28px]">
+      <header className={`hidden md:flex fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 items-center justify-between pl-8 pr-6 backdrop-blur-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border mx-8 mt-4 rounded-[28px] ${
+        isDarkMode ? 'bg-slate-800/95 border-slate-700 text-white' : 'bg-white/95 border-slate-100/80 text-slate-900'
+      }`}>
         <div className="flex items-center gap-12">
           <div onClick={() => onChangeView('dashboard')} className="cursor-pointer">
               <Logo />
           </div>
           <nav className="flex gap-1">
-            {tabs.map((tab) => {
-              if (tab.id === 'stats') {
-                return (
-                  <div key={tab.id} className="relative" ref={statsDropdownRef}>
-                    <button
-                      onClick={() => setIsStatsDropdownOpen(!isStatsDropdownOpen)}
-                      className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
-                        currentView === tab.id 
-                          ? 'text-deep-900 bg-slate-200/50' 
-                          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                      }`}
-                    >
-                      <tab.icon size={19} strokeWidth={currentView === tab.id ? 2.5 : 2} />
-                      {tab.label}
-                    </button>
-                    
-                    {isStatsDropdownOpen && (
-                      <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-2xl shadow-deep border border-slate-200 p-2 animate-enter origin-top-left overflow-hidden z-50">
-                        <button
-                          onClick={() => {
-                            onStatsCategoryChange?.('demand');
-                            setIsStatsDropdownOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
-                        >
-                          주택 수요
-                        </button>
-                        <button
-                          onClick={() => {
-                            onStatsCategoryChange?.('supply');
-                            setIsStatsDropdownOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
-                        >
-                          주택 공급
-                        </button>
-                        <button
-                          onClick={() => {
-                            onStatsCategoryChange?.('ranking');
-                            setIsStatsDropdownOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
-                        >
-                          주택 랭킹
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-              
-              return (
+            {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => onChangeView(tab.id)}
                 className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
                   currentView === tab.id 
-                    ? 'text-deep-900 bg-slate-200/50' 
-                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                    ? isDarkMode ? 'text-white bg-slate-700' : 'text-deep-900 bg-slate-200/50' 
+                    : isDarkMode ? 'text-slate-400 hover:text-white hover:bg-slate-700' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <tab.icon size={19} strokeWidth={currentView === tab.id ? 2.5 : 2} />
                 {tab.label}
               </button>
-              );
-            })}
+            ))}
           </nav>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
             <button 
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                className={`p-2 rounded-full transition-colors ${
+                  isDarkMode ? 'text-slate-400 hover:text-white hover:bg-slate-700' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                }`}
             >
                 <Search className="w-5 h-5" />
             </button>
-            <div className="relative group cursor-pointer p-2 rounded-full hover:bg-slate-100 transition-colors">
-                <Bell className="w-5 h-5 text-slate-400 group-hover:text-slate-600 transition-colors" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-brand-coral rounded-full border border-white"></span>
-            </div>
             
             {/* Profile Dropdown */}
             <div className="relative" ref={profileRef}>
@@ -277,12 +237,35 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
                 </div>
                 
                 {isProfileOpen && (
-                    <div className="absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-deep border border-slate-200 p-2 animate-enter origin-top-right overflow-hidden z-50">
-                        <div className="p-3 border-b border-slate-50 mb-1">
-                             <p className="font-bold text-slate-900 text-[15px]">김부자님</p>
-                             <p className="text-[13px] text-slate-400">rich.kim@sweethome.com</p>
+                    <div className={`absolute right-0 top-12 w-64 rounded-2xl shadow-deep border p-2 animate-enter origin-top-right overflow-hidden z-50 ${
+                      isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'
+                    }`}>
+                        <div className={`p-3 border-b mb-1 ${isDarkMode ? 'border-slate-700' : 'border-slate-50'}`}>
+                             <p className={`font-bold text-[15px] ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>건물주</p>
+                             <p className={`text-[13px] ${isDarkMode ? 'text-slate-400' : 'text-slate-400'}`}>rich.kim@sweethome.com</p>
                         </div>
-                        <div className="mt-1 pt-1">
+                        
+                        {/* Dark Mode Toggle */}
+                        <button 
+                            onClick={() => setIsDarkMode(!isDarkMode)}
+                            className={`w-full text-left px-3 py-2 text-[13px] rounded-lg flex items-center gap-2 font-medium ${
+                              isDarkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-600 hover:bg-slate-50'
+                            }`}
+                        >
+                            {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                            {isDarkMode ? '라이트 모드' : '다크 모드'}
+                        </button>
+                        
+                        {/* QR Code */}
+                        <button 
+                            className={`w-full text-left px-3 py-2 text-[13px] rounded-lg flex items-center gap-2 font-medium ${
+                              isDarkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-600 hover:bg-slate-50'
+                            }`}
+                        >
+                            <QrCode className="w-4 h-4" /> QR 코드
+                        </button>
+                        
+                        <div className={`mt-1 pt-1 border-t ${isDarkMode ? 'border-slate-700' : 'border-slate-50'}`}>
                              <button className="w-full text-left px-3 py-2 text-[13px] text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2 font-medium">
                                  <LogOut className="w-4 h-4" /> 로그아웃
                              </button>
@@ -309,7 +292,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
                  </div>
                  <div>
                     <p className="text-[13px] font-medium mb-0.5 text-slate-500">Good Morning</p>
-                    <p className="text-xl font-black text-slate-900 tracking-tight">김부자님</p>
+                    <p className="text-xl font-black text-slate-900 tracking-tight">건물주</p>
                  </div>
               </div>
               <div className="flex items-center gap-3">
@@ -319,48 +302,46 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
                 >
                     <Search className="w-5 h-5" />
                 </button>
-                <div className="relative p-2.5 rounded-full shadow-sm border border-slate-200/60 bg-white text-slate-400 active:bg-slate-50 active:scale-95 transition-all">
-                    <Bell className="w-5 h-5" />
-                    <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-brand-coral rounded-full border border-white"></span>
-                </div>
               </div>
           </div>
         )}
         
-        <div key={currentView} className="animate-fade-in">
+        <div>
              {children}
         </div>
       </main>
 
       {/* Footer */}
       {!isMapMode && (
-          <footer className="mt-20 border-t border-slate-200 bg-white py-12 px-8">
+          <footer className={`mt-20 border-t py-12 px-8 ${
+            isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'
+          }`}>
               <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
                   <div className="md:col-span-1">
                       <Logo className="mb-4" />
-                      <p className="text-[13px] text-slate-400 leading-relaxed">
+                      <p className={`text-[13px] leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-400'}`}>
                           스위트홈은 데이터 기반의 부동산 의사결정을 지원하는<br/>
                           프리미엄 자산 관리 서비스입니다.
                       </p>
                   </div>
                   <div>
-                      <h4 className="font-bold text-slate-900 mb-4 text-[15px]">서비스</h4>
-                      <ul className="space-y-2 text-[13px] text-slate-500">
-                          <li className="hover:text-slate-900 cursor-pointer">자산 분석</li>
-                          <li className="hover:text-slate-900 cursor-pointer">시장 동향</li>
-                          <li className="hover:text-slate-900 cursor-pointer">세금 계산기</li>
+                      <h4 className={`font-bold mb-4 text-[15px] ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>서비스</h4>
+                      <ul className={`space-y-2 text-[13px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                          <li className={`cursor-pointer ${isDarkMode ? 'hover:text-white' : 'hover:text-slate-900'}`}>자산 분석</li>
+                          <li className={`cursor-pointer ${isDarkMode ? 'hover:text-white' : 'hover:text-slate-900'}`}>시장 동향</li>
+                          <li className={`cursor-pointer ${isDarkMode ? 'hover:text-white' : 'hover:text-slate-900'}`}>세금 계산기</li>
                       </ul>
                   </div>
                    <div>
-                      <h4 className="font-bold text-slate-900 mb-4 text-[15px]">고객지원</h4>
-                      <ul className="space-y-2 text-[13px] text-slate-500">
-                          <li className="hover:text-slate-900 cursor-pointer">자주 묻는 질문</li>
-                          <li className="hover:text-slate-900 cursor-pointer">문의하기</li>
-                          <li className="hover:text-slate-900 cursor-pointer">이용약관</li>
+                      <h4 className={`font-bold mb-4 text-[15px] ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>고객지원</h4>
+                      <ul className={`space-y-2 text-[13px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                          <li className={`cursor-pointer ${isDarkMode ? 'hover:text-white' : 'hover:text-slate-900'}`}>자주 묻는 질문</li>
+                          <li className={`cursor-pointer ${isDarkMode ? 'hover:text-white' : 'hover:text-slate-900'}`}>문의하기</li>
+                          <li className={`cursor-pointer ${isDarkMode ? 'hover:text-white' : 'hover:text-slate-900'}`}>이용약관</li>
                       </ul>
                   </div>
                   <div>
-                      <p className="text-[13px] text-slate-400">
+                      <p className={`text-[13px] ${isDarkMode ? 'text-slate-400' : 'text-slate-400'}`}>
                           (주)스위트홈 | 대표: 홍길동<br/>
                           서울시 강남구 테헤란로 123<br/>
                           사업자등록번호: 123-45-67890<br/>
