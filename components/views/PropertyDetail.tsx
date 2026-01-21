@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Star, Plus, ArrowRightLeft, Building2, MapPin, Calendar, Car } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Star, Plus, ArrowRightLeft, Building2, MapPin, Calendar, Car, ChevronDown } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { ProfessionalChart } from '../ui/ProfessionalChart';
 
@@ -11,7 +11,7 @@ interface PropertyDetailProps {
 
 type TabType = 'chart' | 'info';
 type ChartType = '매매' | '전세' | '월세';
-type TransactionType = '전체' | '매매' | '전세' | '월세';
+type TransactionType = '전체' | '매매' | '전/월세';
 
 const generateChartData = (type: ChartType) => {
     const data = [];
@@ -80,15 +80,22 @@ const detailData = {
 const FormatPrice = ({ val, sizeClass = "text-[28px]" }: { val: number, sizeClass?: string }) => {
   const eok = Math.floor(val / 10000);
   const man = val % 10000;
+  
+  if (eok === 0) {
+    // 1억 미만인 경우
+    return (
+      <span className={`tabular-nums tracking-tight text-slate-900 ${sizeClass}`}>
+        <span className="font-bold">{man.toLocaleString()}</span>
+      </span>
+    );
+  }
+  
   return (
       <span className={`tabular-nums tracking-tight text-slate-900 ${sizeClass}`}>
           <span className="font-bold">{eok}</span>
           <span className="font-medium text-slate-600 ml-0.5 mr-1.5">억</span>
           {man > 0 && (
-            <>
-                <span className="font-bold">{man.toLocaleString()}</span>
-                <span className="font-medium text-slate-600 ml-0.5">만원</span>
-            </>
+            <span className="font-bold">{man.toLocaleString()}</span>
           )}
       </span>
   );
@@ -99,20 +106,15 @@ const NeighborItem: React.FC<{ item: typeof detailData.neighbors[0], currentPric
     const isHigher = diffRatio > 0;
     
     return (
-        <div className="flex items-center justify-between p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50 cursor-pointer transition-colors bg-white">
-            <div>
-                <div className="flex items-center gap-3 flex-wrap mb-1">
-                    <p className="text-[15px] font-bold text-slate-900">{item.name}</p>
-                    <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${isHigher ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
-                        {isHigher ? '비쌈' : '저렴'} {Math.abs(diffRatio).toFixed(1)}%
-                    </span>
-                </div>
-            </div>
-            <div className="text-right flex-shrink-0">
-                <p className="text-[15px] font-bold text-slate-900 tabular-nums">
-                    <FormatPrice val={item.price} sizeClass="text-[15px]" />
-                </p>
-            </div>
+        <div className="flex justify-between p-4 text-[15px]">
+            <span className="font-medium text-slate-500">
+                {item.name} <span className={`text-[15px] font-bold px-1.5 py-0.5 rounded ${isHigher ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+                    {isHigher ? '비쌈' : '저렴'} {Math.abs(diffRatio).toFixed(1)}%
+                </span>
+            </span>
+            <span className="font-bold text-slate-900 text-right tabular-nums">
+                <FormatPrice val={item.price} sizeClass="text-[15px]" />
+            </span>
         </div>
     );
 };
@@ -121,16 +123,78 @@ const TransactionRow: React.FC<{ tx: typeof detailData.transactions[0] }> = ({ t
     const typeColor = tx.type === '매매' ? 'text-slate-900' : (tx.type === '전세' ? 'text-indigo-600' : 'text-emerald-600');
     
     return (
-        <div className="grid grid-cols-4 py-4 text-[15px] border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors items-center h-[52px]">
-            <div className="text-slate-500 pl-4 text-[12px] font-medium tabular-nums">{tx.date}</div>
-            <div className={`font-bold ${typeColor} text-center text-[13px]`}>{tx.type}</div>
-            <div className="text-slate-500 text-center text-[12px] tabular-nums">{tx.floor}</div>
-            <div className="text-right tabular-nums pr-4">
+        <div className="grid grid-cols-4 py-4 px-5 text-[15px] border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors items-center h-[52px]">
+            <div className="text-slate-500 text-[15px] font-medium tabular-nums">{tx.date}</div>
+            <div className={`font-bold ${typeColor} text-center text-[15px]`}>{tx.type}</div>
+            <div className="text-slate-500 text-center text-[15px] tabular-nums">{tx.floor}</div>
+            <div className="text-right tabular-nums">
                 <FormatPrice val={tx.price} sizeClass="text-[15px]" />
             </div>
         </div>
     );
 }
+
+const CustomDropdown: React.FC<{ 
+    value: TransactionType;
+    onChange: (value: TransactionType) => void;
+    options: { value: TransactionType; label: string }[];
+}> = ({ value, onChange, options }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]);
+
+    const selectedOption = options.find(opt => opt.value === value);
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-[12px] font-bold bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-3 focus:ring-0 focus:border-slate-300 hover:bg-slate-100 transition-colors flex items-center gap-1.5"
+            >
+                <span>{selectedOption?.label || value}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            <div 
+                className={`absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 transition-all duration-200 ease-out origin-top ${
+                    isOpen 
+                        ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto max-h-96' 
+                        : 'opacity-0 scale-y-95 -translate-y-1 pointer-events-none max-h-0 overflow-hidden'
+                }`}
+            >
+                {options.map((option) => (
+                    <button
+                        key={option.value}
+                        onClick={() => {
+                            onChange(option.value);
+                            setIsOpen(false);
+                        }}
+                        className={`w-full text-left text-[12px] font-bold py-2 px-3 hover:bg-slate-50 transition-colors ${
+                            value === option.value ? 'bg-slate-100 text-slate-900' : 'text-slate-700'
+                        }`}
+                    >
+                        {option.label}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBack, isCompact = false }) => {
   const [activeTab, setActiveTab] = useState<TabType>('chart');
@@ -144,9 +208,12 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
       setChartData(generateChartData(chartType));
   }, [chartType]);
 
-  const filteredTransactions = detailData.transactions.filter(tx => 
-      txFilter === '전체' ? true : tx.type === txFilter
-  );
+  const filteredTransactions = detailData.transactions.filter(tx => {
+      if (txFilter === '전체') return true;
+      if (txFilter === '매매') return tx.type === '매매';
+      if (txFilter === '전/월세') return tx.type === '전세' || tx.type === '월세';
+      return false;
+  });
 
   return (
     <div className={`bg-slate-50 min-h-full font-sans text-slate-900 ${isCompact ? 'p-0' : ''}`}>
@@ -242,7 +309,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                     
                     {/* 2. Chart Card */}
                     <div className="lg:col-span-2 space-y-4">
-                        <Card className="p-6 bg-white min-h-[450px] flex flex-col">
+                        <Card className="p-6 bg-white h-[500px] flex flex-col">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
                                     {(['매매', '전세', '월세'] as ChartType[]).map(type => (
@@ -289,14 +356,16 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                         </Card>
 
                         {/* Neighbors List */}
-                        <div className="">
-                            <h3 className="text-[17px] font-black text-slate-900 mb-4 px-1">주변 시세 비교</h3>
-                            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col divide-y divide-slate-50">
+                        <Card className="bg-white overflow-hidden">
+                            <div className="p-5 border-b border-slate-100">
+                                <h3 className="text-[16px] font-black text-slate-900">주변 시세 비교</h3>
+                            </div>
+                            <div className="divide-y divide-slate-50">
                                 {detailData.neighbors.map((item, i) => (
                                     <NeighborItem key={i} item={item} currentPrice={detailData.currentPrice} />
                                 ))}
                             </div>
-                        </div>
+                        </Card>
                     </div>
 
                     {/* 3. Transaction Table & Info */}
@@ -304,22 +373,22 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                         <Card className="bg-white overflow-hidden flex flex-col h-[500px]">
                             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
                                 <h3 className="text-[16px] font-black text-slate-900">실거래 내역</h3>
-                                <select 
+                                <CustomDropdown
                                     value={txFilter}
-                                    onChange={(e) => setTxFilter(e.target.value as TransactionType)}
-                                    className="text-[12px] font-bold bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 focus:ring-0 focus:border-slate-300"
-                                >
-                                    <option value="전체">전체</option>
-                                    <option value="매매">매매</option>
-                                    <option value="전세">전세</option>
-                                </select>
+                                    onChange={setTxFilter}
+                                    options={[
+                                        { value: '전체', label: '전체' },
+                                        { value: '매매', label: '매매' },
+                                        { value: '전/월세', label: '전/월세' }
+                                    ]}
+                                />
                             </div>
                             
-                            <div className="grid grid-cols-4 py-3 px-4 bg-slate-50/50 text-[12px] font-bold text-slate-500 border-b border-slate-100">
-                                <div className="pl-4">일자</div>
+                            <div className="grid grid-cols-4 py-3 px-5 bg-slate-50/50 text-[12px] font-bold text-slate-500 border-b border-slate-100">
+                                <div>일자</div>
                                 <div className="text-center">구분</div>
                                 <div className="text-center">층</div>
-                                <div className="text-right pr-4">거래액</div>
+                                <div className="text-right">거래액</div>
                             </div>
                             
                             <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -335,7 +404,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                             </div>
                             <div className="divide-y divide-slate-50">
                                 {detailData.info.map((info, i) => (
-                                    <div key={i} className="flex justify-between p-4 text-[14px]">
+                                    <div key={i} className="flex justify-between p-4 text-[15px]">
                                         <span className="font-medium text-slate-500">{info.label}</span>
                                         <span className="font-bold text-slate-900 text-right">{info.value}</span>
                                     </div>

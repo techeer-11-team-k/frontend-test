@@ -36,10 +36,10 @@ export const PortfolioList: React.FC<ViewProps & { onBack: () => void }> = ({ on
     
     if (eok === 0) {
       // 1억 미만인 경우
-      return `${man.toLocaleString()}만원`;
+      return `${man.toLocaleString()}`;
     } else {
       // 1억 이상인 경우
-      return `${eok}억 ${man > 0 ? man.toLocaleString() : ''}만원`;
+      return `${eok}억 ${man > 0 ? man.toLocaleString() : ''}`;
     }
   };
 
@@ -76,7 +76,7 @@ export const PortfolioList: React.FC<ViewProps & { onBack: () => void }> = ({ on
                   <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-[17px] font-black tracking-tight text-slate-900">포트폴리오 심층 분석</h1>
+                <h1 className="text-[17px] font-black tracking-tight text-slate-900">자산 상세 분석</h1>
               </div>
           </div>
           <div className="flex items-center gap-2">
