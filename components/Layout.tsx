@@ -175,7 +175,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
       {/* ----------------------------------------------------------------------
           PC HEADER (Frosted Glass with Border)
       ----------------------------------------------------------------------- */}
-      <header className={`hidden md:flex fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 items-center justify-between px-8 ${scrolled ? 'glass-frosted' : 'bg-transparent'}`}>
+      <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 items-center justify-between px-8 glass-card shadow-soft mx-8 mt-4 rounded-[28px]">
         <div className="flex items-center gap-12">
           <div onClick={() => onChangeView('dashboard')} className="cursor-pointer">
               <Logo />
