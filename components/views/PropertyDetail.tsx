@@ -372,10 +372,10 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                     
                     {/* Middle Row: Big Price & Change */}
                     <div className={`${isSidebar ? 'mt-0' : 'mt-0'} flex items-center justify-between gap-4 flex-wrap`}>
-                        <div className="flex items-baseline gap-4 flex-wrap">
+                        <div className="flex items-center gap-4 flex-wrap">
                             <FormatPrice val={isSidebar ? areaBasedPrice : detailData.currentPrice} sizeClass={isSidebar ? "text-[32px]" : "text-[42px]"} />
                             
-                            <div className="flex flex-col items-start leading-none">
+                            <div className="flex flex-col items-center leading-none">
                                 <span className={`${isSidebar ? 'text-[16px]' : 'text-[15px]'} font-medium text-slate-400 mb-0.5`}>지난 실거래가 대비</span>
                                 <div className={`${isSidebar ? 'text-[16px]' : 'text-[15px]'} font-bold flex items-center gap-1 tabular-nums ${areaBasedDiffRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
                                     {areaBasedDiffRate >= 0 ? '▲' : '▼'} {Math.abs(isSidebar ? areaBasedDiff : detailData.diff).toLocaleString()} ({Math.abs(areaBasedDiffRate)}%)
@@ -630,38 +630,45 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                         <div className="lg:col-span-2 space-y-8">
                             <Card className="p-6 bg-white h-[500px] flex flex-col">
                                 <div className="flex items-center justify-between mb-6">
-                                    <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
-                                        {(['매매', '전세', '월세'] as ChartType[]).map(type => (
-                                            <button
-                                                    key={type}
-                                                    onClick={() => setChartType(type)}
-                                                    className={`px-4 py-1.5 text-[13px] font-bold rounded-md transition-all ${
-                                                        chartType === type
-                                                        ? 'bg-white text-slate-900 shadow-sm'
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
+                                            {(['매매', '전세', '월세'] as ChartType[]).map(type => (
+                                                <button
+                                                        key={type}
+                                                        onClick={() => setChartType(type)}
+                                                        className={`px-4 py-1.5 text-[13px] font-bold rounded-md transition-all ${
+                                                            chartType === type
+                                                            ? 'bg-white text-slate-900 shadow-sm'
+                                                            : 'text-slate-400 hover:text-slate-600'
+                                                        }`}
+                                                >
+                                                    {type}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        
+                                        {/* Segmented Control for Period */}
+                                        <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
+                                            {['1년', '3년', '전체'].map(p => (
+                                                <button 
+                                                    key={p} 
+                                                    onClick={() => setChartPeriod(p)} 
+                                                    className={`px-3 py-1.5 text-[12px] font-bold rounded-md transition-all ${
+                                                        chartPeriod === p 
+                                                        ? 'bg-white text-slate-900 shadow-sm' 
                                                         : 'text-slate-400 hover:text-slate-600'
                                                     }`}
-                                            >
-                                                {type}
-                                            </button>
-                                        ))}
+                                                >
+                                                    {p}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
                                     
-                                    {/* Segmented Control for Period */}
-                                    <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
-                                        {['1년', '3년', '전체'].map(p => (
-                                            <button 
-                                                key={p} 
-                                                onClick={() => setChartPeriod(p)} 
-                                                className={`px-3 py-1.5 text-[12px] font-bold rounded-md transition-all ${
-                                                    chartPeriod === p 
-                                                    ? 'bg-white text-slate-900 shadow-sm' 
-                                                    : 'text-slate-400 hover:text-slate-600'
-                                                }`}
-                                            >
-                                                {p}
-                                            </button>
-                                        ))}
-                                    </div>
+                                    <button className="text-[12px] font-bold bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 focus:ring-0 focus:border-slate-300 hover:bg-slate-100 transition-colors flex items-center gap-1.5">
+                                        <span>전체</span>
+                                        <ChevronDown className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
 
                                 <div className="flex-1 w-full relative">
