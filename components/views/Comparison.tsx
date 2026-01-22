@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Sparkles, X, Plus, Building2, Car, Calendar, MapPin, ChevronUp, Filter, Check, RefreshCw } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, Legend, LabelList } from 'recharts';
 
 const ASSET_COLORS: Record<string, string> = {
   '압구정 현대': '#1E88E5', // Blue
@@ -1097,7 +1097,7 @@ export const Comparison: React.FC = () => {
                                     dataKey="value" 
                                     radius={[8, 8, 0, 0]}
                                     isAnimationActive={true}
-                                    animationDuration={800}
+                                    animationDuration={150}
                                     name="매매가"
                                     onMouseEnter={() => setHoveredBarType('value')}
                                     onMouseLeave={() => setHoveredBarType(null)}
@@ -1115,13 +1115,68 @@ export const Comparison: React.FC = () => {
                                         }}
                                       />
                                     ))}
+                                    <LabelList
+                                      dataKey="value"
+                                      position="top"
+                                      isAnimationActive={false}
+                                      content={(props: any) => {
+                                        const { x, y, width, value, index } = props;
+                                        const entry = chartData[index];
+                                        const asset = assets.find(a => a.name === entry.name);
+                                        
+                                        // selectedAssetId와 일치하는 항목만 레이블 표시
+                                        if (!asset || asset.id !== selectedAssetId) return null;
+                                        
+                                        let displayValue = value;
+                                        let unit = '';
+                                        
+                                        if (chartDisplayFilter === '전세가율') {
+                                          unit = '%';
+                                        } else if (chartDisplayFilter === '세대수') {
+                                          displayValue = value.toLocaleString();
+                                          unit = '세대';
+                                        } else if (chartDisplayFilter === '주차공간') {
+                                          unit = '대';
+                                        } else if (chartDisplayFilter === '건축연도') {
+                                          unit = '년';
+                                        } else if (chartDisplayFilter === '평당가') {
+                                          unit = '억';
+                                        } else {
+                                          unit = '억';
+                                        }
+                                        
+                                        return (
+                                          <g>
+                                            <rect
+                                              x={x + width / 2 - 35}
+                                              y={y - 32}
+                                              width="70"
+                                              height="26"
+                                              fill="white"
+                                              rx="6"
+                                              opacity="0.95"
+                                            />
+                                            <text
+                                              x={x + width / 2}
+                                              y={y - 14}
+                                              fill={entry.color}
+                                              fontSize="14"
+                                              fontWeight="bold"
+                                              textAnchor="middle"
+                                            >
+                                              {displayValue}{unit}
+                                            </text>
+                                          </g>
+                                        );
+                                      }}
+                                    />
                                   </Bar>
                                   {chartDisplayFilter === '매매가' && (
                                       <Bar 
                                         dataKey="jeonse" 
                                         radius={[8, 8, 0, 0]}
                                         isAnimationActive={true}
-                                        animationDuration={800}
+                                        animationDuration={150}
                                         name="전세가"
                                         onMouseEnter={() => setHoveredBarType('jeonse')}
                                         onMouseLeave={() => setHoveredBarType(null)}
@@ -1142,6 +1197,43 @@ export const Comparison: React.FC = () => {
                                                 />
                                             );
                                         })}
+                                        <LabelList
+                                          dataKey="jeonse"
+                                          position="top"
+                                          isAnimationActive={false}
+                                          content={(props: any) => {
+                                            const { x, y, width, value, index } = props;
+                                            const entry = chartData[index];
+                                            const asset = assets.find(a => a.name === entry.name);
+                                            
+                                            // selectedAssetId와 일치하는 항목만 레이블 표시
+                                            if (!asset || asset.id !== selectedAssetId || !value) return null;
+                                            
+                                            return (
+                                              <g>
+                                                <rect
+                                                  x={x + width / 2 - 35}
+                                                  y={y - 32}
+                                                  width="70"
+                                                  height="26"
+                                                  fill="white"
+                                                  rx="6"
+                                                  opacity="0.95"
+                                                />
+                                                <text
+                                                  x={x + width / 2}
+                                                  y={y - 14}
+                                                  fill={entry.darkerColor}
+                                                  fontSize="14"
+                                                  fontWeight="bold"
+                                                  textAnchor="middle"
+                                                >
+                                                  {value}억
+                                                </text>
+                                              </g>
+                                            );
+                                          }}
+                                        />
                                       </Bar>
                                   )}
                               </BarChart>

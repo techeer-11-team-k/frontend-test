@@ -474,19 +474,10 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
 
   const chartSeries: ChartSeriesData[] = useMemo(() => {
       const visibleAssets = activeGroup.assets.filter(asset => asset.isVisible);
+      if (visibleAssets.length === 0) return [];
 
-      if (viewMode === 'combined') {
-          if (visibleAssets.length === 0) return [];
-          const avgData = calculateAverageData(visibleAssets);
-          const filteredData = filterDataByPeriod(avgData);
-          let color = '#ffffff'; 
-          if (filteredData.length > 0) {
-              const start = filteredData[0].value;
-              const end = filteredData[filteredData.length - 1].value;
-              color = end >= start ? '#FF4B4B' : '#3182F6';
-          }
-          return [{ name: `${activeGroup.name} 평균`, data: filteredData, color: color, visible: true }];
-      }
+      // 모아보기: 개별 자산 라인들을 모두 표시 (평균선 제거)
+      // 개별보기: 개별 자산 라인들 표시
       return visibleAssets.map(asset => ({
           name: viewMode === 'separate' ? '' : asset.name,
           data: filterDataByPeriod(asset.chartData),
@@ -652,15 +643,11 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
             </div>
         )}
 
-        {/* Add Apartment Modal */}
+        {/* Add Apartment Modal - 3번 사진처럼 화면 유지 */}
         {isAddApartmentModalOpen && (
-            <div 
-                className="fixed inset-0 z-[100] flex items-center justify-center p-4 pt-24"
-                onClick={() => setIsAddApartmentModalOpen(false)}
-            >
-                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+            <div className="fixed inset-0 z-[100] flex items-start justify-center pt-32 pointer-events-none">
                 <div 
-                    className="relative bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
+                    className="relative bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[60vh] pointer-events-auto"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <div className="p-6 border-b border-slate-100">
@@ -692,7 +679,7 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                                 className="flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors border border-slate-100"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-xl overflow-hidden">
+                                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100">
                                         <img 
                                             src={getApartmentImageUrl(apt.id)} 
                                             alt={apt.name}
@@ -861,10 +848,10 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
 
                     {/* Bottom Row: Policy News & Region Comparison */}
                     <div className="grid grid-cols-12 gap-8 mt-8">
-                        <div className="col-span-7 h-[466px]">
+                        <div className="col-span-7 h-[520px]">
                             <PolicyNewsList />
                         </div>
-                        <div className="col-span-5 h-[466px]">
+                        <div className="col-span-5 h-[520px]">
                             <RegionComparisonChart />
                         </div>
                     </div>

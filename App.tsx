@@ -80,9 +80,13 @@ function App() {
           return <HousingDemand />;
         } else if (statsCategory === 'supply') {
           return <HousingSupply />;
+        } else if (statsCategory === 'ranking') {
+          return <Ranking onPropertyClick={handlePropertyClick} />;
         } else {
-          return <Statistics />; // 주택 랭킹은 나중에 구현
+          return <HousingDemand />;
         }
+      case 'ranking':
+        return <Ranking onPropertyClick={handlePropertyClick} />;
       default:
         return <Dashboard onPropertyClick={handlePropertyClick} onViewAllPortfolio={handleViewAllPortfolio} />;
     }

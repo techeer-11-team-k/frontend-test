@@ -17,6 +17,7 @@ interface ProfessionalChartProps {
     areaTopColor?: string;
     areaBottomColor?: string;
     isSparkline?: boolean;
+    showHighLow?: boolean;
 }
 
 export const ProfessionalChart: React.FC<ProfessionalChartProps> = ({ 
@@ -27,7 +28,8 @@ export const ProfessionalChart: React.FC<ProfessionalChartProps> = ({
     lineColor,
     areaTopColor,
     areaBottomColor,
-    isSparkline = false
+    isSparkline = false,
+    showHighLow = false
 }) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);

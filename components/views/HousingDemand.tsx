@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, ReferenceLine, Cell } from 'recharts';
 import { ChevronDown } from 'lucide-react';
-import { HPIHeatmap } from '../ui/HPIHeatmap';
 import { MigrationSankey } from '../ui/MigrationSankey';
+import { KoreaHexMap, RegionType } from '../ui/KoreaHexMap';
 
 // 연도별 거래량 더미 데이터
 const yearlyData = [
@@ -56,15 +56,6 @@ const marketPhases = [
     { region: '인천 송도', phase: '회복기', trend: 'up', change: '+0.4%', color: 'text-orange-500', bg: 'bg-orange-50' },
 ];
 
-const hpiData = [
-    { name: '서울특별시', value: 104.4, change: 0.51, isPositive: true },
-    { name: '세종특별자치시', value: 102.9, change: 0.16, isPositive: true },
-    { name: '경기도', value: 101.5, change: 0.23, isPositive: true },
-    { name: '인천광역시', value: 100.0, change: 0.18, isPositive: true },
-    { name: '부산광역시', value: 99.5, change: -0.07, isPositive: false },
-    { name: '대구광역시', value: 98.2, change: -0.15, isPositive: false },
-];
-
 const migrationData = [
     { name: '경기', value: 4500, label: '순유입' },
     { name: '인천', value: 1200, label: '순유입' },
@@ -76,7 +67,7 @@ const migrationData = [
 export const HousingDemand: React.FC = () => {
   const [viewMode, setViewMode] = useState<'yearly' | 'monthly'>('monthly');
   const [yearRange, setYearRange] = useState<2 | 3 | 5>(3);
-  const [selectedRegion, setSelectedRegion] = useState('전국');
+  const [selectedRegion, setSelectedRegion] = useState<RegionType>('전국');
   const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState(false);
   const regionDropdownRef = useRef<HTMLDivElement>(null);
   
@@ -170,7 +161,7 @@ export const HousingDemand: React.FC = () => {
                 
                 {isRegionDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-full bg-white rounded-xl shadow-deep border border-slate-200 overflow-hidden z-50 animate-enter origin-top-right">
-                    {['전국', '수도권', '지방 5대광역시'].map((region) => (
+                    {(['전국', '수도권', '지방 5대광역시'] as RegionType[]).map((region) => (
                       <button
                         key={region}
                         onClick={() => {
@@ -341,6 +332,7 @@ export const HousingDemand: React.FC = () => {
           </div>
       </Card>
 
+
       {/* 시장 국면 분석 */}
       <Card className="p-0 overflow-hidden border border-slate-200 shadow-soft bg-white">
            <div className="p-6 border-b border-slate-100">
@@ -370,16 +362,19 @@ export const HousingDemand: React.FC = () => {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* HPI */}
+          {/* 지역별 주택 가격 지수 벌집 지도 */}
           <Card className="p-0 overflow-hidden border border-slate-200 shadow-soft bg-white">
                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                   <div>
-                    <h3 className="font-black text-slate-900 text-[17px]">주택가격지수 (HPI)</h3>
-                    <p className="text-[13px] text-slate-500 mt-1 font-medium">2025.03 기준</p>
+                    <h3 className="font-black text-slate-900 text-[17px]">주택 가격 지수</h3>
+                    <p className="text-[13px] text-slate-500 mt-1 font-medium">색상이 진할수록 값이 높음 (0~100)</p>
                   </div>
               </div>
               <div className="p-6">
-                  <HPIHeatmap data={hpiData} />
+                  <KoreaHexMap 
+                    region={selectedRegion} 
+                    className="w-full"
+                  />
               </div>
           </Card>
 
