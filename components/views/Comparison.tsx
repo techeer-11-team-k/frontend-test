@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, Sparkles, X, Plus, Building2, Car, Calendar, MapPin, ChevronUp, Filter, Check, RefreshCw } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, Legend, LabelList } from 'recharts';
 import { ToggleButtonGroup } from '../ui/ToggleButtonGroup';
+import { ApartmentRow } from '../ui/ApartmentRow';
 
 const ASSET_COLORS: Record<string, string> = {
   '압구정 현대': '#1E88E5', // Blue
@@ -1423,47 +1424,37 @@ export const Comparison: React.FC = () => {
                               const isDimmed = selectedAssetId !== null && !isSelected;
 
                               return (
-                                  <div 
-                                    key={asset.id} 
-                                    onClick={() => handleAssetClick(asset.id)}
-                                    className={`flex items-center justify-between bg-white border rounded-xl px-5 py-4 cursor-pointer transition-all duration-200
-                                        ${isSelected 
-                                            ? 'border-indigo-500 ring-1 ring-indigo-500/20 shadow-md z-10' 
-                                            : 'border-slate-200 hover:border-indigo-300'
-                                        }
-                                        ${isDimmed ? 'opacity-50 grayscale' : 'opacity-100'}
-                                    `}
-                                  >
-                                      <div className="flex items-center gap-3 flex-1">
-                                          <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: asset.color }}></div>
-                                          <div className="flex-1">
-                                              <h4 className={`text-[15px] font-black leading-tight transition-colors ${isSelected ? 'text-indigo-900' : 'text-slate-900'}`}>
-                                                  {asset.name.replace(/ \d+평형$/, '')}
-                                              </h4>
-                                              <p className="text-[13px] text-slate-500 font-medium mt-0.5">{asset.region}</p>
-                                          </div>
-                                      </div>
-
-                                      <div className="flex items-center gap-3">
-                                          {asset.pyeongType && (
-                                              <div className="flex items-center gap-2">
-                                                  <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[13px] font-black">
-                                                      {asset.pyeongType}
-                                                  </span>
+                                  <ApartmentRow
+                                      key={asset.id}
+                                      name={asset.name.replace(/ \d+평형$/, '')}
+                                      location={asset.region}
+                                      area={asset.area || 84}
+                                      price={asset.price * 10000}
+                                      color={asset.color}
+                                      showColorDot={true}
+                                      isSelected={isSelected}
+                                      isDimmed={isDimmed}
+                                      onClick={() => handleAssetClick(asset.id)}
+                                      onRemove={(e) => handleRemoveAsset(asset.id, e)}
+                                      variant="selected"
+                                      showChevron={false}
+                                      className="mb-3"
+                                      rightContent={
+                                          <div className="flex items-center gap-3">
+                                              {asset.pyeongType && (
+                                                  <div className="flex items-center gap-2">
+                                                      <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[13px] font-black">
+                                                          {asset.pyeongType}
+                                                      </span>
+                                                      <span className="text-[15px] font-black text-slate-800 tabular-nums">{asset.price}억</span>
+                                                  </div>
+                                              )}
+                                              {!asset.pyeongType && (
                                                   <span className="text-[15px] font-black text-slate-800 tabular-nums">{asset.price}억</span>
-                                              </div>
-                                          )}
-                                          {!asset.pyeongType && (
-                                              <span className="text-[15px] font-black text-slate-800 tabular-nums">{asset.price}억</span>
-                                          )}
-                                          <button 
-                                            onClick={(e) => handleRemoveAsset(asset.id, e)}
-                                            className="p-1.5 text-slate-300 hover:bg-slate-100 hover:text-red-500 rounded-lg transition-colors"
-                                          >
-                                              <X className="w-4 h-4" />
-                                          </button>
-                                      </div>
-                                  </div>
+                                              )}
+                                          </div>
+                                      }
+                                  />
                               );
                           })}
 

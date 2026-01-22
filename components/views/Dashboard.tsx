@@ -8,6 +8,7 @@ import { PolicyNewsList } from './PolicyNewsList';
 import { RegionComparisonChart } from '../RegionComparisonChart';
 import { ProfileWidgetsCard } from '../ProfileWidgetsCard';
 import { ToggleButtonGroup } from '../ui/ToggleButtonGroup';
+import { ApartmentRow } from '../ui/ApartmentRow';
 
 // ----------------------------------------------------------------------
 // DATA & UTILS
@@ -193,6 +194,7 @@ const CHART_COLORS = [
 // SUB-COMPONENTS
 // ----------------------------------------------------------------------
 
+// 자산 행 컴포넌트 (Dashboard 페이지 전용)
 const AssetRow: React.FC<{ 
     item: DashboardAsset; 
     onClick: () => void;
@@ -200,68 +202,39 @@ const AssetRow: React.FC<{
 }> = ({ item, onClick, onToggleVisibility }) => {
     const isProfit = item.changeRate >= 0;
     const imageUrl = getApartmentImageUrl(item.id);
-    const pyeong = convertToPyeong(item.area);
     
     return (
-        <div 
-            onClick={onClick} 
-            className={`group flex items-center justify-between py-4 border-b border-slate-100 last:border-0 px-2 transition-all duration-300 cursor-pointer rounded-2xl ${item.isVisible ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50'}`}
-        >
-            <div className="flex items-center gap-4">
-                {/* Eye Icon for Visibility Toggle */}
-                <button 
-                    onClick={onToggleVisibility}
-                    className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                    {item.isVisible ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5 opacity-50" />}
-                </button>
-
-                <div className="relative flex-shrink-0">
-                    {/* Apartment Image */}
-                    <div className={`w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 transition-opacity ${item.isVisible ? 'opacity-100' : 'opacity-50'}`}>
-                        <img 
-                            src={imageUrl} 
-                            alt={item.name} 
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                    {item.isVisible && (
-                        <div 
-                            className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10"
-                            style={{ backgroundColor: item.color }}
-                        ></div>
-                    )}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                    <h4 className={`font-bold text-[17px] md:text-[17px] truncate leading-tight mb-1 transition-colors ${item.isVisible ? 'text-slate-900 group-hover:text-blue-600' : 'text-slate-400'}`}>
-                        {item.name}
-                    </h4>
-                    <div className="flex items-center gap-2 text-[13px] text-slate-500 truncate font-medium">
-                        <span className="truncate">{item.location}</span>
-                        <span className="w-px h-2.5 bg-slate-200 flex-shrink-0"></span>
-                        <span className="flex-shrink-0 tabular-nums">{item.area}㎡ ({pyeong}평)</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex items-center gap-4 flex-shrink-0 pl-2">
-                <div className="text-right min-w-[120px]">
-                    <p className={`font-bold text-[17px] md:text-lg tabular-nums tracking-tight text-right ${item.isVisible ? 'text-slate-900' : 'text-slate-400'}`}>
-                        <FormatPriceWithUnit value={item.currentPrice} />
-                    </p>
-                    {item.purchasePrice > 0 && (
-                        <p className={`text-[13px] mt-0.5 font-bold tabular-nums text-right ${isProfit ? 'text-red-500' : 'text-blue-500'}`}>
-                            {isProfit ? '+' : '-'}<FormatPriceWithUnit value={Math.abs(item.currentPrice - item.purchasePrice)} isDiff /> ({Math.abs(item.changeRate)}%)
+        <ApartmentRow
+            name={item.name}
+            location={item.location}
+            area={item.area}
+            price={item.currentPrice}
+            imageUrl={imageUrl}
+            color={item.color}
+            showImage={true}
+            isVisible={item.isVisible}
+            onClick={onClick}
+            onToggleVisibility={onToggleVisibility}
+            variant="compact"
+            className="px-2"
+            rightContent={
+                <>
+                    <div className="text-right min-w-[120px]">
+                        <p className={`font-bold text-[17px] md:text-lg tabular-nums tracking-tight text-right ${item.isVisible ? 'text-slate-900' : 'text-slate-400'}`}>
+                            <FormatPriceWithUnit value={item.currentPrice} />
                         </p>
-                    )}
-                </div>
-                
-                <div className="hidden md:block transform transition-transform duration-300 group-hover:translate-x-1 text-slate-300 group-hover:text-blue-500">
-                    <ChevronRight className="w-5 h-5" />
-                </div>
-            </div>
-        </div>
+                        {item.purchasePrice > 0 && (
+                            <p className={`text-[13px] mt-0.5 font-bold tabular-nums text-right ${isProfit ? 'text-red-500' : 'text-blue-500'}`}>
+                                {isProfit ? '+' : '-'}<FormatPriceWithUnit value={Math.abs(item.currentPrice - item.purchasePrice)} isDiff /> ({Math.abs(item.changeRate)}%)
+                            </p>
+                        )}
+                    </div>
+                    <div className="hidden md:block transform transition-transform duration-300 group-hover:translate-x-1 text-slate-300 group-hover:text-blue-500">
+                        <ChevronRight className="w-5 h-5" />
+                    </div>
+                </>
+            }
+        />
     );
 }
 
