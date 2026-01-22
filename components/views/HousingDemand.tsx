@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 import { ChevronDown } from 'lucide-react';
 import { MigrationSankey } from '../ui/MigrationSankey';
 import { KoreaHexMap, RegionType } from '../ui/KoreaHexMap';
+import { ToggleButtonGroup } from '../ui/ToggleButtonGroup';
 
 // 연도별 거래량 더미 데이터
 const yearlyData = [
@@ -194,62 +195,18 @@ export const HousingDemand: React.FC = () => {
                       </p>
                   </div>
                   <div className="flex items-center gap-3">
-                      <div className="flex items-center bg-slate-100 rounded-lg p-1 gap-0">
-                          <button
-                              onClick={() => setViewMode('yearly')}
-                              className={`px-4 py-2 rounded-md text-[13px] font-bold transition-all ${
-                                  viewMode === 'yearly'
-                                      ? 'bg-white text-slate-900'
-                                      : 'text-slate-500 hover:text-slate-700'
-                              }`}
-                          >
-                              연도별
-                          </button>
-                          <button
-                              onClick={() => setViewMode('monthly')}
-                              className={`px-4 py-2 rounded-md text-[13px] font-bold transition-all ${
-                                  viewMode === 'monthly'
-                                      ? 'bg-white text-slate-900'
-                                      : 'text-slate-500 hover:text-slate-700'
-                              }`}
-                          >
-                              월별
-                          </button>
-                      </div>
+                      <ToggleButtonGroup
+                          options={['연도별', '월별']}
+                          value={viewMode === 'yearly' ? '연도별' : '월별'}
+                          onChange={(value) => setViewMode(value === '연도별' ? 'yearly' : 'monthly')}
+                      />
                       
                       {viewMode === 'monthly' && (
-                          <div className="flex items-center bg-slate-100 rounded-lg p-1 gap-0">
-                              <button
-                                  onClick={() => setYearRange(2)}
-                                  className={`px-3 py-2 rounded-md text-[12px] font-bold transition-all ${
-                                      yearRange === 2
-                                          ? 'bg-white text-slate-900'
-                                          : 'text-slate-500 hover:text-slate-700'
-                                  }`}
-                              >
-                                  2년
-                              </button>
-                              <button
-                                  onClick={() => setYearRange(3)}
-                                  className={`px-3 py-2 rounded-md text-[12px] font-bold transition-all ${
-                                      yearRange === 3
-                                          ? 'bg-white text-slate-900'
-                                          : 'text-slate-500 hover:text-slate-700'
-                                  }`}
-                              >
-                                  3년
-                              </button>
-                              <button
-                                  onClick={() => setYearRange(5)}
-                                  className={`px-3 py-2 rounded-md text-[12px] font-bold transition-all ${
-                                      yearRange === 5
-                                          ? 'bg-white text-slate-900'
-                                          : 'text-slate-500 hover:text-slate-700'
-                                  }`}
-                              >
-                                  5년
-                              </button>
-                          </div>
+                          <ToggleButtonGroup
+                              options={['2년', '3년', '5년']}
+                              value={`${yearRange}년`}
+                              onChange={(value) => setYearRange(parseInt(value.replace('년', '')))}
+                          />
                       )}
                   </div>
               </div>

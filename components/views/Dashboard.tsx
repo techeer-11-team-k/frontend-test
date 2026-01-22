@@ -7,6 +7,7 @@ import { NumberTicker } from '../ui/NumberTicker';
 import { PolicyNewsList } from './PolicyNewsList';
 import { RegionComparisonChart } from '../RegionComparisonChart';
 import { ProfileWidgetsCard } from '../ProfileWidgetsCard';
+import { ToggleButtonGroup } from '../ui/ToggleButtonGroup';
 
 // ----------------------------------------------------------------------
 // DATA & UTILS
@@ -582,28 +583,12 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                 </select>
             </div>
 
-            <div className="bg-slate-100 p-1 rounded-lg flex items-center shadow-inner h-10 flex-shrink-0">
-                <button
-                    onClick={() => handleViewModeChange('separate')}
-                    className={`flex-1 md:flex-none px-4 h-full flex items-center justify-center text-[13px] md:text-[15px] font-bold rounded-md transition-all ${
-                        viewMode === 'separate' 
-                        ? 'bg-white text-slate-900 shadow-sm' 
-                        : 'text-slate-400 hover:text-slate-600'
-                    }`}
-                >
-                    개별 보기
-                </button>
-                <button
-                    onClick={() => handleViewModeChange('combined')}
-                    className={`flex-1 md:flex-none px-4 h-full flex items-center justify-center text-[13px] md:text-[15px] font-bold rounded-md transition-all ${
-                        viewMode === 'combined' 
-                        ? 'bg-white text-slate-900 shadow-sm' 
-                        : 'text-slate-400 hover:text-slate-600'
-                    }`}
-                >
-                    모아 보기
-                </button>
-            </div>
+            <ToggleButtonGroup
+                options={['개별 보기', '모아 보기']}
+                value={viewMode === 'separate' ? '개별 보기' : '모아 보기'}
+                onChange={(value) => handleViewModeChange(value === '개별 보기' ? 'separate' : 'combined')}
+                className="shadow-inner"
+            />
         </div>
       </>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Sparkles, X, Plus, Building2, Car, Calendar, MapPin, ChevronUp, Filter, Check, RefreshCw } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, Legend, LabelList } from 'recharts';
+import { ToggleButtonGroup } from '../ui/ToggleButtonGroup';
 
 const ASSET_COLORS: Record<string, string> = {
   '압구정 현대': '#1E88E5', // Blue
@@ -678,20 +679,11 @@ export const Comparison: React.FC = () => {
               <p className="text-slate-500 text-[15px] font-medium">관심 있는 단지들의 가격 구조와 투자 가치를 입체적으로 비교하세요.</p>
           </div>
           
-          <div className="bg-slate-100 p-1 rounded-xl flex items-center font-bold text-[13px]">
-             <button 
-                onClick={() => setComparisonMode('1:1')}
-                className={`px-5 py-2.5 rounded-lg transition-all ${comparisonMode === '1:1' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
-            >
-                1:1 정밀 비교
-             </button>
-             <button 
-                onClick={() => setComparisonMode('multi')}
-                className={`px-5 py-2.5 rounded-lg transition-all ${comparisonMode === 'multi' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
-             >
-                다수 아파트 분석
-             </button>
-          </div>
+          <ToggleButtonGroup
+              options={['1:1 정밀 비교', '다수 아파트 분석']}
+              value={comparisonMode === '1:1' ? '1:1 정밀 비교' : '다수 아파트 분석'}
+              onChange={(value) => setComparisonMode(value === '1:1 정밀 비교' ? '1:1' : 'multi')}
+          />
       </div>
 
       {comparisonMode === '1:1' ? (

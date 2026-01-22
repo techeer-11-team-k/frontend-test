@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Star, Plus, ArrowRightLeft, Building2, MapPin, Calendar, Car, ChevronDown } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { ProfessionalChart } from '../ui/ProfessionalChart';
+import { ToggleButtonGroup } from '../ui/ToggleButtonGroup';
 
 interface PropertyDetailProps {
   propertyId: string;
@@ -395,38 +396,20 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                         {/* Chart - List Style */}
                         <div className="bg-transparent flex flex-col">
                             <div className={`flex items-center justify-between ${isSidebar ? 'mb-5' : 'mb-6'} flex-wrap gap-2`}>
-                                <div className="flex bg-slate-100/80 rounded-lg p-1 gap-1">
-                                    {(['매매', '전세', '월세'] as ChartType[]).map(type => (
-                                        <button
-                                                key={type}
-                                                onClick={() => setChartType(type)}
-                                                className={`${isSidebar ? 'px-3 py-1.5 text-[13px]' : 'px-4 py-1.5 text-[13px]'} font-bold rounded-md transition-all ${
-                                                    chartType === type
-                                                    ? 'bg-white text-slate-900 shadow-sm'
-                                                    : 'text-slate-400 hover:text-slate-600'
-                                                }`}
-                                        >
-                                            {type}
-                                        </button>
-                                    ))}
-                                </div>
+                                <ToggleButtonGroup
+                                    options={['매매', '전세', '월세']}
+                                    value={chartType}
+                                    onChange={(value) => setChartType(value as ChartType)}
+                                    className="bg-slate-100/80"
+                                />
                                 
                                 {/* Segmented Control for Period */}
-                                <div className="flex bg-slate-100/80 rounded-lg p-1 gap-1">
-                                    {['1년', '3년', '전체'].map(p => (
-                                        <button 
-                                            key={p} 
-                                            onClick={() => setChartPeriod(p)} 
-                                            className={`${isSidebar ? 'px-3 py-1.5 text-[13px]' : 'px-3 py-1.5 text-[12px]'} font-bold rounded-md transition-all ${
-                                                chartPeriod === p 
-                                                ? 'bg-white text-slate-900 shadow-sm' 
-                                                : 'text-slate-400 hover:text-slate-600'
-                                            }`}
-                                        >
-                                            {p}
-                                        </button>
-                                    ))}
-                                </div>
+                                <ToggleButtonGroup
+                                    options={['1년', '3년', '전체']}
+                                    value={chartPeriod}
+                                    onChange={(value) => setChartPeriod(value)}
+                                    className="bg-slate-100/80"
+                                />
                             </div>
 
                             <div className="flex-1 w-full relative">
@@ -514,38 +497,18 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                         <div className="lg:col-span-2 space-y-4">
                             <Card className="p-6 bg-white h-[500px] flex flex-col">
                                 <div className="flex items-center justify-between mb-6">
-                                    <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
-                                        {(['매매', '전세', '월세'] as ChartType[]).map(type => (
-                                            <button
-                                                    key={type}
-                                                    onClick={() => setChartType(type)}
-                                                    className={`px-4 py-1.5 text-[13px] font-bold rounded-md transition-all ${
-                                                        chartType === type
-                                                        ? 'bg-white text-slate-900 shadow-sm'
-                                                        : 'text-slate-400 hover:text-slate-600'
-                                                    }`}
-                                            >
-                                                {type}
-                                            </button>
-                                        ))}
-                                    </div>
+                                    <ToggleButtonGroup
+                                        options={['매매', '전세', '월세']}
+                                        value={chartType}
+                                        onChange={(value) => setChartType(value as ChartType)}
+                                    />
                                     
                                     {/* Segmented Control for Period */}
-                                    <div className="flex bg-slate-100 rounded-lg p-1 gap-1">
-                                        {['1년', '3년', '전체'].map(p => (
-                                            <button 
-                                                key={p} 
-                                                onClick={() => setChartPeriod(p)} 
-                                                className={`px-3 py-1.5 text-[12px] font-bold rounded-md transition-all ${
-                                                    chartPeriod === p 
-                                                    ? 'bg-white text-slate-900 shadow-sm' 
-                                                    : 'text-slate-400 hover:text-slate-600'
-                                                }`}
-                                            >
-                                                {p}
-                                            </button>
-                                        ))}
-                                    </div>
+                                    <ToggleButtonGroup
+                                        options={['1년', '3년', '전체']}
+                                        value={chartPeriod}
+                                        onChange={(value) => setChartPeriod(value)}
+                                    />
                                 </div>
 
                                 <div className="flex-1 w-full relative">
