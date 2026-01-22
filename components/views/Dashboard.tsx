@@ -202,7 +202,7 @@ const AssetRow: React.FC<{
 }> = ({ item, onClick, onToggleVisibility }) => {
     const isProfit = item.changeRate >= 0;
     const imageUrl = getApartmentImageUrl(item.id);
-    
+    //
     return (
         <ApartmentRow
             name={item.name}
