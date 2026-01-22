@@ -299,49 +299,31 @@ export const ProfileWidgetsCard: React.FC<ProfileWidgetsCardProps> = ({ activeGr
                 onClick={() => setSelectedRateIndex(selectedRateIndex === index ? null : index)}
                 className={`rounded-xl transition-all cursor-pointer ${
                   selectedRateIndex === index 
-                    ? 'bg-slate-50 p-3' 
+                    ? 'bg-slate-50 p-2' 
                     : 'hover:bg-slate-50 p-2'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-                      rate.trend === 'up' ? 'bg-red-100' : 
-                      rate.trend === 'down' ? 'bg-blue-100' : 
-                      'bg-purple-100'
-                    }`}>
-                      {rate.trend === 'up' ? (
-                        <TrendingUp className="w-3 h-3 text-red-500" />
-                      ) : rate.trend === 'down' ? (
-                        <TrendingDown className="w-3 h-3 text-blue-500" />
-                      ) : (
-                        <span className="text-[8px] font-black text-purple-500">—</span>
-                      )}
-                    </div>
-                    <span className="text-[12px] text-slate-600 font-medium">{rate.label}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-black text-slate-900">{rate.value.toFixed(2)}%</span>
-                    <span className={`text-[10px] font-bold ${
-                      rate.trend === 'stable' ? 'text-slate-400' :
+                  <span className="text-[11px] text-slate-600 font-medium">{rate.label}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[13px] font-black text-slate-900 tabular-nums">{rate.value.toFixed(2)}%</span>
+                    <span className={`text-[9px] font-bold tabular-nums ${
+                      rate.trend === 'stable' ? 'text-purple-500' :
                       rate.change > 0 ? 'text-red-500' : 
                       'text-blue-500'
                     }`}>
                       {rate.trend === 'stable' ? '동결' : 
-                       rate.change > 0 ? `+${rate.change.toFixed(2)}%` : 
-                       `${rate.change.toFixed(2)}%`}
+                       rate.change > 0 ? `+${rate.change.toFixed(2)}` : 
+                       `${rate.change.toFixed(2)}`}
                     </span>
-                    <ChevronRight className={`w-3 h-3 text-slate-400 transition-transform ${
-                      selectedRateIndex === index ? 'rotate-90' : ''
-                    }`} />
                   </div>
                 </div>
                 
-                {/* 미니 차트 */}
+                {/* 미니 차트 - 6개월 전~현재 */}
                 {selectedRateIndex === index && (
-                  <div className="mt-3 h-[60px] animate-fade-in">
+                  <div className="mt-2 h-[60px] animate-fade-in">
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={rate.history} margin={{ top: 5, right: 5, left: 5, bottom: 0 }}>
+                      <AreaChart data={rate.history} margin={{ top: 5, right: 5, left: 5, bottom: 15 }}>
                         <defs>
                           <linearGradient id={`gradient-${index}`} x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor={rate.trend === 'up' ? '#ef4444' : rate.trend === 'down' ? '#3b82f6' : '#8b5cf6'} stopOpacity={0.3}/>
@@ -352,8 +334,9 @@ export const ProfileWidgetsCard: React.FC<ProfileWidgetsCardProps> = ({ activeGr
                           dataKey="month" 
                           axisLine={false} 
                           tickLine={false} 
-                          tick={{ fontSize: 9, fill: '#94a3b8' }}
-                          interval={1}
+                          tick={{ fontSize: 8, fill: '#94a3b8' }}
+                          interval="preserveStartEnd"
+                          tickFormatter={(value, idx) => idx === 0 ? '6개월전' : idx === 5 ? '현재' : ''}
                         />
                         <Area 
                           type="monotone" 
@@ -374,121 +357,129 @@ export const ProfileWidgetsCard: React.FC<ProfileWidgetsCardProps> = ({ activeGr
 
       {/* 내 자산 포트폴리오 Section - 현재 탭에 따라 변경 */}
       <div className="mb-6 pb-6 border-b border-slate-100">
-        <h3 className="text-[15px] font-black text-slate-900 mb-4">내 자산 포트폴리오</h3>
+        <h3 className="text-[15px] font-black text-slate-900 mb-4">
+          {activeGroupName === '내 자산' ? '내 자산 포트폴리오' : `${activeGroupName} 포트폴리오`}
+        </h3>
         
-        <div className="flex flex-col items-center">
-          <div className="w-[140px] h-[140px] relative mb-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={(() => {
-                    const colors = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444'];
-                    const totalPrice = currentApartments.reduce((sum, a) => sum + a.currentPrice, 0);
-                    return currentApartments.map((apt, index) => ({
-                      name: apt.name,
-                      value: Math.round((apt.currentPrice / totalPrice) * 100),
-                      color: colors[index % colors.length],
-                    }));
-                  })()}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={selectedApartmentIndex !== null ? 35 : 40}
-                  outerRadius={selectedApartmentIndex !== null ? 68 : 65}
-                  paddingAngle={2}
-                  dataKey="value"
-                  startAngle={90}
-                  endAngle={-270}
-                  labelLine={false}
-                  activeIndex={selectedApartmentIndex !== null ? selectedApartmentIndex : undefined}
-                  activeShape={(props: any) => {
-                    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
-                    return (
-                      <g>
-                        <Sector
-                          cx={cx}
-                          cy={cy}
-                          innerRadius={innerRadius - 3}
-                          outerRadius={outerRadius + 5}
-                          startAngle={startAngle}
-                          endAngle={endAngle}
-                          fill={fill}
-                          style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+        {(() => {
+          // 퍼센트 계산 및 높은 순으로 정렬
+          const colors = ['#3182F6', '#FF4B4B', '#f59e0b', '#8b5cf6', '#10b981', '#06b6d4'];
+          const totalPrice = currentApartments.reduce((sum, a) => sum + a.currentPrice, 0);
+          const apartmentsWithPercentage = currentApartments.map((apt, originalIndex) => ({
+            ...apt,
+            percentage: Math.round((apt.currentPrice / totalPrice) * 100),
+            originalIndex,
+            color: colors[originalIndex % colors.length],
+          }));
+          // % 높은 순으로 정렬
+          const sortedApartments = [...apartmentsWithPercentage].sort((a, b) => b.percentage - a.percentage);
+          
+          return (
+            <div className="flex flex-col items-center">
+              <div className="w-[130px] h-[130px] relative mb-3 overflow-visible">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                    <Pie
+                      data={sortedApartments.map(apt => ({
+                        name: apt.name,
+                        value: apt.percentage,
+                        color: apt.color,
+                      }))}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={35}
+                      outerRadius={selectedApartmentIndex !== null ? 58 : 55}
+                      paddingAngle={2}
+                      dataKey="value"
+                      startAngle={90}
+                      endAngle={-270}
+                      labelLine={false}
+                      activeIndex={selectedApartmentIndex !== null ? selectedApartmentIndex : undefined}
+                      activeShape={(props: any) => {
+                        const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+                        return (
+                          <g>
+                            <Sector
+                              cx={cx}
+                              cy={cy}
+                              innerRadius={innerRadius - 2}
+                              outerRadius={outerRadius + 3}
+                              startAngle={startAngle}
+                              endAngle={endAngle}
+                              fill={fill}
+                              style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))' }}
+                            />
+                          </g>
+                        );
+                      }}
+                      onMouseEnter={(_, index) => setSelectedApartmentIndex(index)}
+                      onMouseLeave={() => setSelectedApartmentIndex(null)}
+                      onClick={(_, index) => setSelectedApartmentIndex(selectedApartmentIndex === index ? null : index)}
+                    >
+                      {sortedApartments.map((apt, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={apt.color}
+                          style={{ 
+                            cursor: 'pointer',
+                            opacity: selectedApartmentIndex !== null && selectedApartmentIndex !== index ? 0.4 : 1,
+                            transition: 'opacity 0.2s ease'
+                          }}
                         />
-                      </g>
-                    );
-                  }}
-                  onMouseEnter={(_, index) => setSelectedApartmentIndex(index)}
-                  onMouseLeave={() => setSelectedApartmentIndex(null)}
-                  onClick={(_, index) => setSelectedApartmentIndex(selectedApartmentIndex === index ? null : index)}
-                >
-                  {currentApartments.map((_, index) => {
-                    const colors = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444'];
-                    return (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={colors[index % colors.length]}
-                        style={{ 
-                          cursor: 'pointer',
-                          opacity: selectedApartmentIndex !== null && selectedApartmentIndex !== index ? 0.4 : 1,
-                          transition: 'opacity 0.2s ease'
-                        }}
-                      />
-                    );
-                  })}
-                </Pie>
-                <Tooltip 
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload;
-                      return (
-                        <div className="bg-slate-900 text-white px-3 py-2 rounded-lg shadow-lg text-[11px]">
-                          <p className="font-bold">{data.name}</p>
-                          <p className="text-slate-300">{data.value}%</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-slate-900 text-white px-3 py-2 rounded-lg shadow-lg text-[11px]">
+                              <p className="font-bold">{data.name}</p>
+                              <p className="text-slate-300">{data.value}%</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
 
-          {/* 지역별 범례 - 아파트 이름과 퍼센트 */}
-          <div className="w-full space-y-2">
-            {currentApartments.map((apt, index) => {
-              const colors = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444'];
-              const totalPrice = currentApartments.reduce((sum, a) => sum + a.currentPrice, 0);
-              const percentage = Math.round((apt.currentPrice / totalPrice) * 100);
-              const isSelected = selectedApartmentIndex === index;
-              return (
-                <div 
-                  key={apt.id} 
-                  className={`flex items-center justify-between cursor-pointer p-1.5 rounded-lg transition-all ${
-                    isSelected ? 'bg-slate-100 scale-[1.02]' : 'hover:bg-slate-50'
-                  } ${selectedApartmentIndex !== null && !isSelected ? 'opacity-50' : ''}`}
-                  onClick={() => setSelectedApartmentIndex(isSelected ? null : index)}
-                  onMouseEnter={() => setSelectedApartmentIndex(index)}
-                  onMouseLeave={() => setSelectedApartmentIndex(null)}
-                >
-                  <div className="flex items-center gap-2">
+              {/* 지역별 범례 - 아파트 이름과 퍼센트 (% 높은 순) */}
+              <div className="w-full space-y-1.5">
+                {sortedApartments.map((apt, index) => {
+                  const isSelected = selectedApartmentIndex === index;
+                  return (
                     <div 
-                      className={`w-2.5 h-2.5 rounded-full flex-shrink-0 transition-transform ${isSelected ? 'scale-125' : ''}`}
-                      style={{ backgroundColor: colors[index % colors.length] }}
-                    ></div>
-                    <span className={`text-[12px] font-medium truncate max-w-[100px] transition-colors ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-700'}`}>{apt.name}</span>
-                  </div>
-                  <span className={`text-[12px] font-bold transition-colors ${isSelected ? 'text-blue-600' : 'text-slate-900'}`}>{percentage}%</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                      key={apt.id} 
+                      className={`flex items-center justify-between cursor-pointer p-1.5 rounded-lg transition-all ${
+                        isSelected ? 'bg-slate-100 scale-[1.02]' : 'hover:bg-slate-50'
+                      } ${selectedApartmentIndex !== null && !isSelected ? 'opacity-50' : ''}`}
+                      onClick={() => setSelectedApartmentIndex(isSelected ? null : index)}
+                      onMouseEnter={() => setSelectedApartmentIndex(index)}
+                      onMouseLeave={() => setSelectedApartmentIndex(null)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className={`w-2.5 h-2.5 rounded-full flex-shrink-0 transition-transform ${isSelected ? 'scale-125' : ''}`}
+                          style={{ backgroundColor: apt.color }}
+                        ></div>
+                        <span className={`text-[11px] font-medium truncate max-w-[90px] transition-colors ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-700'}`}>{apt.name}</span>
+                      </div>
+                      <span className={`text-[11px] font-bold transition-colors ${isSelected ? 'text-blue-600' : 'text-slate-900'}`}>{apt.percentage}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Upcoming Events Section */}
       <div className="mb-0">
-        <h3 className="text-[15px] font-black text-slate-900 mb-4">부동산 주요 일정</h3>
+        <h3 className="text-[15px] font-black text-slate-900 mb-4">주요 일정</h3>
         
         <div className="space-y-0 relative">
           {sortedEvents.map((event, index) => (
@@ -525,46 +516,26 @@ export const ProfileWidgetsCard: React.FC<ProfileWidgetsCardProps> = ({ activeGr
       </div>
       </div>
 
-      {/* Event Tooltip - 검은색 말풍선 */}
+      {/* Event Tooltip - 검은색 말풍선 (뉴스 위에 표시, z-index 최상위) */}
       {selectedEvent && tooltipPosition && (
         <div 
-          className="fixed z-[300] event-tooltip animate-fade-in"
+          className="fixed z-[9999] event-tooltip animate-fade-in pointer-events-auto"
           style={{ 
             left: tooltipPosition.x, 
             top: tooltipPosition.y,
             transform: 'translateY(-50%)'
           }}
         >
-          <div className="relative bg-slate-900 text-white rounded-xl shadow-2xl p-4 w-56">
+          <div className="relative bg-slate-900 text-white rounded-xl shadow-2xl p-3 w-48">
             {/* 말풍선 화살표 */}
             <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2">
               <div className="w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-slate-900"></div>
             </div>
             
-            <div className="flex items-start gap-3 mb-3">
-              <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${
-                selectedEvent.type === 'tax' ? 'bg-blue-500/20 text-blue-400' :
-                selectedEvent.type === 'update' ? 'bg-purple-500/20 text-purple-400' :
-                selectedEvent.type === 'deadline' ? 'bg-orange-500/20 text-orange-400' :
-                'bg-green-500/20 text-green-400'
-              }`}>
-                {getEventIcon(selectedEvent.iconType)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-[13px] font-bold text-white mb-0.5">{selectedEvent.title}</h4>
-                <div className="flex items-center gap-2 text-[11px] text-gray-400">
-                  <span>{selectedEvent.date}</span>
-                  {selectedEvent.daysLeft && (
-                    <span className="text-red-400 font-bold">D-{selectedEvent.daysLeft}</span>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            <p className="text-[11px] text-gray-300 leading-relaxed">
-              {selectedEvent.type === 'tax' && '재산세 납부 기한입니다. 기한 내 납부하지 않으면 가산세가 부과됩니다.'}
-              {selectedEvent.type === 'update' && '관심 단지의 최신 실거래가 정보가 업데이트되었습니다.'}
-              {selectedEvent.type === 'deadline' && '부동산 등기 신고 마감일입니다. 기한 내 신고해주세요.'}
+            <p className="text-[11px] text-gray-200 leading-relaxed">
+              {selectedEvent.type === 'tax' && '재산세 납부 기한입니다. 기한 내 납부해주세요.'}
+              {selectedEvent.type === 'update' && '관심 단지 실거래가가 업데이트되었습니다.'}
+              {selectedEvent.type === 'deadline' && '등기 신고 마감일입니다. 기한 내 신고해주세요.'}
               {selectedEvent.type === 'alert' && '월세 수령 예정일입니다. 입금을 확인해주세요.'}
             </p>
             
@@ -574,7 +545,7 @@ export const ProfileWidgetsCard: React.FC<ProfileWidgetsCardProps> = ({ activeGr
                 setSelectedEvent(null);
                 setTooltipPosition(null);
               }}
-              className="absolute top-2 right-2 p-1 rounded-md hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+              className="absolute top-1 right-1 p-1 rounded-md hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
             >
               <X className="w-3 h-3" />
             </button>

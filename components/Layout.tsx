@@ -154,7 +154,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isStatsDropdownOpen, setIsStatsDropdownOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // localStorage에서 저장된 설정을 불러옴 (브라우저 설정 무시)
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sweethome-dark-mode');
+      return saved === 'true';
+    }
+    return false;
+  });
   const [isQROpen, setIsQROpen] = useState(false);
   
   const isMapMode = currentView === 'map' && !isDetailOpen;
@@ -192,7 +199,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
   }, [isDarkMode]);
 
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
+    const newValue = !isDarkMode;
+    setIsDarkMode(newValue);
+    // localStorage에 설정 저장
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sweethome-dark-mode', String(newValue));
+    }
   };
 
   const openQRModal = () => {
