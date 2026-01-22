@@ -5,7 +5,7 @@ import { ProfessionalChart, ChartSeriesData } from '../ui/ProfessionalChart';
 import { Skeleton } from '../ui/Skeleton';
 import { NumberTicker } from '../ui/NumberTicker';
 import { PolicyNewsList } from './PolicyNewsList';
-import { RegionComparisonChart } from './RegionComparisonChart';
+import { RegionComparisonChart } from '../RegionComparisonChart';
 import { ProfileWidgetsCard } from '../ProfileWidgetsCard';
 
 // ----------------------------------------------------------------------

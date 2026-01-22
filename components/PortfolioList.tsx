@@ -1,8 +1,8 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Calendar, DollarSign, FileText, ArrowRight, Percent, Building2 } from 'lucide-react';
-import { Property, ViewProps } from '../../types';
-import { Card } from '../ui/Card';
-import { myProperties } from './Dashboard';
+import { Property, ViewProps } from '../types';
+import { Card } from './ui/Card';
+import { myProperties } from './views/Dashboard';
 
 // ----------------------------------------------------------------------
 // TYPES & INTERFACES

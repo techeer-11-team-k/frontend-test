@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, MapPin, Sparkles, SlidersHorizontal, Map } from 'lucide-react';
 import { ViewProps } from '../../types';
-import { MapSideDetail } from './MapSideDetail';
+import { MapSideDetail } from '../MapSideDetail';
 
 const MapMarker = ({ price, onClick, selected }: { price: string, onClick: () => void, selected: boolean }) => (
     <div 
