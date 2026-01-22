@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, MapPin, ExternalLink, AlertCircle } from 'lucide-react';
-import { PropertyDetail } from './PropertyDetail';
+import { PropertyDetail } from './views/PropertyDetail';
 
 interface PropertyData {
   id: string;

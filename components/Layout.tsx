@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Compass, ArrowRightLeft, PieChart, Search, LogOut, X, Sparkles, Moon, Sun, QrCode } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { ViewType, TabItem } from '../types';
@@ -164,10 +165,21 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
   });
   const [isQROpen, setIsQROpen] = useState(false);
   
+  const location = useLocation();
+  const navigate = useNavigate();
+  
   const isMapMode = currentView === 'map' && !isDetailOpen;
   const isDashboard = currentView === 'dashboard';
   const profileRef = useRef<HTMLDivElement>(null);
   const statsDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // 현재 경로에 따라 active 상태 결정
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -263,74 +275,86 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
       ----------------------------------------------------------------------- */}
       <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 items-center justify-between px-8 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] border border-slate-100/80 dark:border-slate-700/80 mx-8 mt-4 rounded-[28px]">
         <div className="flex items-center gap-12">
-          <div onClick={() => onChangeView('dashboard')} className="cursor-pointer">
+          <Link to="/" className="cursor-pointer">
               <Logo />
-          </div>
+          </Link>
           <nav className="flex gap-1">
             {tabs.map((tab) => {
               if (tab.id === 'stats') {
+                const statsActive = isActive('/stats');
                 return (
                   <div key={tab.id} className="relative" ref={statsDropdownRef}>
                     <button
                       onClick={() => setIsStatsDropdownOpen(!isStatsDropdownOpen)}
                       className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
-                        currentView === tab.id 
+                        statsActive 
                           ? 'text-deep-900 dark:text-white bg-slate-200/50 dark:bg-slate-700/50' 
                           : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >
-                      <tab.icon size={19} strokeWidth={currentView === tab.id ? 2.5 : 2} />
+                      <tab.icon size={19} strokeWidth={statsActive ? 2.5 : 2} />
                       {tab.label}
                     </button>
                     
                     {isStatsDropdownOpen && (
                       <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-deep border border-slate-200 dark:border-slate-700 p-2 animate-enter origin-top-left overflow-hidden z-50">
-                        <button
+                        <Link
+                          to="/stats/demand"
                           onClick={() => {
-                            onStatsCategoryChange?.('demand');
                             setIsStatsDropdownOpen(false);
                           }}
-                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors block"
                         >
                           주택 수요
-                        </button>
-                        <button
+                        </Link>
+                        <Link
+                          to="/stats/supply"
                           onClick={() => {
-                            onStatsCategoryChange?.('supply');
                             setIsStatsDropdownOpen(false);
                           }}
-                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors block"
                         >
                           주택 공급
-                        </button>
-                        <button
+                        </Link>
+                        <Link
+                          to="/stats/ranking"
                           onClick={() => {
-                            onStatsCategoryChange?.('ranking');
                             setIsStatsDropdownOpen(false);
                           }}
-                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                          className="w-full text-left px-4 py-3 text-[14px] font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors block"
                         >
                           주택 랭킹
-                        </button>
+                        </Link>
                       </div>
                     )}
                   </div>
                 );
               }
               
+              // 경로 매핑
+              const pathMap: Record<string, string> = {
+                'dashboard': '/',
+                'map': '/map',
+                'compare': '/compare',
+                'stats': '/stats'
+              };
+              
+              const tabPath = pathMap[tab.id] || '/';
+              const active = isActive(tabPath);
+              
               return (
-              <button
+              <Link
                 key={tab.id}
-                onClick={() => onChangeView(tab.id)}
+                to={tabPath}
                 className={`px-4 py-2 rounded-lg text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
-                  currentView === tab.id 
+                  active 
                     ? 'text-deep-900 dark:text-white bg-slate-200/50 dark:bg-slate-700/50' 
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                <tab.icon size={19} strokeWidth={currentView === tab.id ? 2.5 : 2} />
+                <tab.icon size={19} strokeWidth={active ? 2.5 : 2} />
                 {tab.label}
-              </button>
+              </Link>
               );
             })}
           </nav>
@@ -484,23 +508,30 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, onChangeV
                         ${isDockVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-[200%] opacity-0 scale-90'}`}
         >
           {tabs.map((tab) => {
-            const isActive = currentView === tab.id;
+            const pathMap: Record<string, string> = {
+              'dashboard': '/',
+              'map': '/map',
+              'compare': '/compare',
+              'stats': '/stats'
+            };
+            const tabPath = pathMap[tab.id] || '/';
+            const active = isActive(tabPath);
             return (
-              <button
+              <Link
                 key={tab.id}
-                onClick={() => onChangeView(tab.id)}
+                to={tabPath}
                 className="relative z-10 flex flex-col items-center justify-center w-12 h-12 group"
               >
                 <div 
                   className={`flex items-center justify-center p-2.5 rounded-full transition-all duration-300 ${
-                    isActive 
+                    active 
                       ? 'bg-deep-900 dark:bg-slate-700 text-white shadow-lg scale-110' 
                       : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 active:scale-95'
                   }`}
                 >
-                  <tab.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                  <tab.icon size={20} strokeWidth={active ? 2.5 : 2} />
                 </div>
-              </button>
+              </Link>
             );
           })}
         </nav>

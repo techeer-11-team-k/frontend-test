@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Trophy, TrendingUp, TrendingDown, Activity, ChevronRight, ArrowUpDown, Coins, CircleDollarSign, Banknote } from 'lucide-react';
 import { ViewProps } from '../../types';
 import { Card } from '../ui/Card';
+import { ApartmentRow } from '../ui/ApartmentRow';
 
 // 랭킹 데이터 타입
 interface RankingItem {
@@ -70,93 +71,29 @@ const generateRankingData = (type: string, period: string): RankingItem[] => {
   });
 };
 
-// 평수 변환 (1평 = 3.3058㎡)
-const convertToPyeong = (area: number) => {
-  return Math.round((area / 3.3058) * 10) / 10; // 소수점 첫째자리까지
-};
 
-// 가격 포맷팅
-const FormatPrice = ({ value }: { value: number }) => {
-  const eok = Math.floor(value / 10000);
-  const man = value % 10000;
-  
-  return (
-    <span className="tabular-nums tracking-tight">
-      <span className="font-bold">{eok}</span>
-      <span className="font-bold ml-0.5 mr-1">억</span>
-      {man > 0 && (
-        <span className="font-bold">{man.toLocaleString()}</span>
-      )}
-    </span>
-  );
-};
-
-// 랭킹 아이템 컴포넌트
+// 랭킹 아이템 컴포넌트 (Ranking 페이지 전용)
 const RankingRow: React.FC<{
   item: RankingItem;
   onClick: () => void;
   showChangeRate?: boolean;
   showTransactionCount?: boolean;
 }> = ({ item, onClick, showChangeRate, showTransactionCount }) => {
-  const isTop3 = item.rank <= 3;
-  
   return (
-    <div
+    <ApartmentRow
+      name={item.name}
+      location={item.location}
+      area={item.area}
+      price={item.price}
+      rank={item.rank}
+      changeRate={item.changeRate}
+      transactionCount={item.transactionCount}
+      showRank={true}
+      showChangeRate={showChangeRate}
+      showTransactionCount={showTransactionCount}
       onClick={onClick}
-      className="group flex items-center justify-between py-5 px-6 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-all duration-300 cursor-pointer rounded-xl"
-    >
-      <div className="flex items-center gap-4 flex-1 min-w-0">
-        {/* 순위 */}
-        <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black ${
-          isTop3 
-            ? item.rank === 1 
-              ? 'text-yellow-600 text-xl' 
-              : item.rank === 2
-              ? 'text-gray-400 text-lg'
-              : 'text-orange-600 text-[17px]'
-            : 'text-black text-[15px]'
-        }`}>
-          {item.rank}
-        </div>
-
-        {/* 정보 */}
-        <div className="min-w-0 flex-1">
-          <h4 className="font-bold text-[17px] text-slate-900 truncate mb-1 group-hover:text-blue-600 transition-colors">
-            {item.name}
-          </h4>
-          <div className="flex items-center gap-2 text-[13px] text-slate-500 font-medium">
-            <span className="truncate">{item.location}</span>
-            <span className="w-px h-2.5 bg-slate-200 flex-shrink-0"></span>
-            <span className="flex-shrink-0 tabular-nums">{item.area}㎡ ({convertToPyeong(item.area)}평)</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 가격/변화율/거래량 */}
-      <div className="flex items-center gap-4 flex-shrink-0 pl-4">
-        <div className="text-right">
-          <p className="font-bold text-[17px] tabular-nums tracking-tight text-slate-900">
-            <FormatPrice value={item.price} />
-          </p>
-          {showChangeRate && item.changeRate !== undefined && (
-            <p className={`text-[13px] mt-0.5 font-bold tabular-nums ${
-              item.changeRate >= 0 ? 'text-red-500' : 'text-blue-500'
-            }`}>
-              {item.changeRate >= 0 ? '+' : ''}{item.changeRate.toFixed(1)}%
-            </p>
-          )}
-          {showTransactionCount && item.transactionCount !== undefined && (
-            <p className="text-[13px] mt-0.5 font-bold tabular-nums text-slate-500">
-              {item.transactionCount}건
-            </p>
-          )}
-        </div>
-        
-        <div className="hidden md:block transform transition-transform duration-300 group-hover:translate-x-1 text-slate-300 group-hover:text-blue-500">
-          <ChevronRight className="w-5 h-5" />
-        </div>
-      </div>
-    </div>
+      variant="default"
+    />
   );
 };
 
