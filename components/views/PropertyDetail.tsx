@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Star, Plus, ArrowRightLeft, Building2, MapPin, Calendar, Car, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Star, Plus, ArrowRightLeft, Building2, MapPin, Calendar, Car, ChevronDown, FileText, ExternalLink } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { ProfessionalChart } from '../ui/ProfessionalChart';
 import { ToggleButtonGroup } from '../ui/ToggleButtonGroup';
@@ -188,7 +188,7 @@ const FormatPrice = ({ val, sizeClass = "text-[28px]" }: { val: number, sizeClas
   return (
       <span className={`tabular-nums tracking-tight text-slate-900 ${sizeClass}`}>
           <span className="font-bold">{eok}</span>
-          <span className="font-medium text-slate-600 ml-0.5 mr-1.5">억</span>
+          <span className="font-bold text-slate-900 ml-0.5 mr-1.5">억</span>
           {man > 0 && (
             <>
                 <span className="font-bold">{man.toLocaleString()}</span>
@@ -206,7 +206,7 @@ const NeighborItem: React.FC<{ item: typeof detailData.neighbors[0], currentPric
         <div className="flex justify-between p-4 text-[15px]">
             <span className="font-medium text-slate-500">
                 {item.name} <span className={`text-[15px] font-bold px-1.5 py-0.5 rounded ${isHigher ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
-                    {isHigher ? '비쌈' : '저렴'} {Math.abs(diffRatio).toFixed(1)}%
+                    {Math.abs(diffRatio).toFixed(1)}% {isHigher ? '비쌈' : '저렴'}
                 </span>
             </span>
             <span className="font-bold text-slate-900 text-right tabular-nums">
@@ -230,6 +230,68 @@ const TransactionRow: React.FC<{ tx: typeof detailData.transactions[0] }> = ({ t
         </div>
     );
 }
+
+const CustomDropdown: React.FC<{ 
+    value: TransactionType;
+    onChange: (value: TransactionType) => void;
+    options: { value: TransactionType; label: string }[];
+}> = ({ value, onChange, options }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]);
+
+    const selectedOption = options.find(opt => opt.value === value);
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-[12px] font-bold bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 focus:ring-0 focus:border-slate-300 hover:bg-slate-100 transition-colors flex items-center gap-1.5"
+            >
+                <span>{selectedOption?.label || value}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            <div 
+                className={`absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 transition-all duration-200 ease-out origin-top ${
+                    isOpen 
+                        ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto max-h-96' 
+                        : 'opacity-0 scale-y-95 -translate-y-1 pointer-events-none max-h-0 overflow-hidden'
+                }`}
+            >
+                {options.map((option) => (
+                    <button
+                        key={option.value}
+                        onClick={() => {
+                            onChange(option.value);
+                            setIsOpen(false);
+                        }}
+                        className={`w-full text-left text-[12px] font-bold py-2 px-3 hover:bg-slate-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                            value === option.value ? 'bg-slate-100 text-slate-900' : 'text-slate-700'
+                        }`}
+                    >
+                        {option.label}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 // 면적별 가격 데이터 생성 함수
 const getAreaBasedData = (basePrice: number, area: string) => {
@@ -259,6 +321,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
   const [isFavorite, setIsFavorite] = useState(false);
   const [txFilter, setTxFilter] = useState<TransactionType>('전체');
   const [selectedArea, setSelectedArea] = useState('84');
+  const [isInfoExpanded, setIsInfoExpanded] = useState(false);
 
   const detailData = getDetailData(propertyId);
   
@@ -290,7 +353,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                           <button onClick={onBack} className="p-2 -ml-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
                               <ArrowLeft className="w-5 h-5" />
                           </button>
-                          <span className="text-[15px] font-bold text-slate-900">{detailData.name}</span>
+                          <h1 className="text-2xl font-bold text-slate-900 leading-none">아파트 상세 정보</h1>
                       </div>
                       <div className="flex items-center gap-2">
                           <button 
@@ -298,9 +361,6 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                               className={`p-2 rounded-lg transition-colors ${isFavorite ? 'bg-yellow-50 text-yellow-500' : 'text-slate-400 hover:bg-slate-100'}`}
                           >
                               <Star className={`w-5 h-5 ${isFavorite ? 'fill-yellow-500' : ''}`} />
-                          </button>
-                          <button className="bg-slate-900 text-white text-[13px] font-bold px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors shadow-sm">
-                              내 자산 추가
                           </button>
                       </div>
                   </div>
@@ -312,16 +372,34 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                 
                 {/* 1. Header Card: Refined Layout (Stock App Style) */}
                 <Card className={`${isSidebar ? 'bg-transparent shadow-none border-0 p-5' : 'bg-white p-8'}`}>
+                    {/* Apartment Name */}
+                    {!isSidebar && (
+                        <h1 className="text-2xl font-bold text-slate-900 leading-none mb-1">{detailData.name}</h1>
+                    )}
+                    
                     {/* Middle Row: Big Price & Change */}
-                    <div className={`${isSidebar ? 'mt-0' : 'mt-6'} flex items-center gap-4 flex-wrap`}>
-                        <FormatPrice val={isSidebar ? areaBasedPrice : detailData.currentPrice} sizeClass={isSidebar ? "text-[32px]" : "text-[42px]"} />
-                        
-                        <div className="flex flex-col items-start leading-none" style={{ marginTop: isSidebar ? '-0.5rem' : '-0.5rem' }}>
-                            <div className={`${isSidebar ? 'text-[16px]' : 'text-[15px]'} font-bold flex items-center gap-1 tabular-nums ${areaBasedDiffRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
-                                {areaBasedDiffRate >= 0 ? '▲' : '▼'} {Math.abs(isSidebar ? areaBasedDiff : detailData.diff).toLocaleString()} ({Math.abs(areaBasedDiffRate)}%)
+                    <div className={`${isSidebar ? 'mt-0' : 'mt-0'} flex items-center justify-between gap-4 flex-wrap`}>
+                        <div className="flex items-baseline gap-4 flex-wrap">
+                            <FormatPrice val={isSidebar ? areaBasedPrice : detailData.currentPrice} sizeClass={isSidebar ? "text-[32px]" : "text-[42px]"} />
+                            
+                            <div className="flex flex-col items-start leading-none">
+                                <span className={`${isSidebar ? 'text-[16px]' : 'text-[15px]'} font-medium text-slate-400 mb-0.5`}>지난 실거래가 대비</span>
+                                <div className={`${isSidebar ? 'text-[16px]' : 'text-[15px]'} font-bold flex items-center gap-1 tabular-nums ${areaBasedDiffRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
+                                    {areaBasedDiffRate >= 0 ? '▲' : '▼'} {Math.abs(isSidebar ? areaBasedDiff : detailData.diff).toLocaleString()} ({Math.abs(areaBasedDiffRate)}%)
+                                </div>
                             </div>
-                            <span className={`${isSidebar ? 'text-[13px]' : 'text-[12px]'} font-medium text-slate-400 mt-0.5`}>지난 실거래가 대비</span>
                         </div>
+                        {!isSidebar && (
+                            <div className="flex flex-col gap-2">
+                                <button className="bg-white text-slate-700 border border-slate-300 text-[13px] font-bold px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-1.5">
+                                    <ArrowRightLeft className="w-3.5 h-3.5" />
+                                    비교함 담기
+                                </button>
+                                <button className="bg-slate-900 text-white text-[13px] font-bold px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors shadow-sm">
+                                    내 자산 추가
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Divider */}
@@ -364,6 +442,50 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                             <span className={`${isSidebar ? 'text-[17px]' : 'text-[15px]'} font-bold text-slate-700`}>
                                 세대당 0.8대
                             </span>
+                        </div>
+                    </div>
+
+                    {/* ChevronDown icon at bottom center - Expandable */}
+                    <div className="flex justify-center mt-6">
+                        <button
+                            onClick={() => setIsInfoExpanded(!isInfoExpanded)}
+                            className="p-2 hover:bg-slate-50 rounded-full transition-colors"
+                        >
+                            <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isInfoExpanded ? 'rotate-180' : ''}`} />
+                        </button>
+                    </div>
+
+                    {/* Expanded Info Section */}
+                    <div 
+                        className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                            isInfoExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                        }`}
+                    >
+                        <div className={`mt-4 pt-4 transition-all duration-500 ${
+                            isInfoExpanded ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
+                        }`}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {detailData.info
+                                    .filter(info => {
+                                        // 기존에 표시된 정보 제외
+                                        const excludedLabels = ['세대수'];
+                                        return !excludedLabels.includes(info.label);
+                                    })
+                                    .map((info, i) => (
+                                        <div 
+                                            key={i} 
+                                            className="flex justify-between p-3 text-[14px] hover:bg-slate-50 rounded-lg transition-all duration-300"
+                                            style={{
+                                                transitionDelay: isInfoExpanded ? `${i * 50}ms` : `${(detailData.info.length - i) * 30}ms`,
+                                                opacity: isInfoExpanded ? 1 : 0,
+                                                transform: isInfoExpanded ? 'translateY(0)' : 'translateY(-10px)'
+                                            }}
+                                        >
+                                            <span className="font-medium text-slate-500">{info.label}</span>
+                                            <span className="font-bold text-slate-900 text-right">{info.value}</span>
+                                        </div>
+                                    ))}
+                            </div>
                         </div>
                     </div>
                 </Card>
@@ -494,7 +616,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         
                         {/* 2. Chart Card */}
-                        <div className="lg:col-span-2 space-y-4">
+                        <div className="lg:col-span-2 space-y-8">
                             <Card className="p-6 bg-white h-[500px] flex flex-col">
                                 <div className="flex items-center justify-between mb-6">
                                     <ToggleButtonGroup
@@ -522,14 +644,16 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                             </Card>
 
                             {/* Neighbors List */}
-                            <div className="">
-                                <h3 className="text-[17px] font-black text-slate-900 mb-4 px-1">주변 시세 비교</h3>
-                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col divide-y divide-slate-50">
+                            <Card className="bg-white overflow-hidden flex flex-col h-[400px]">
+                                <div className="p-5 border-b border-slate-100 flex-shrink-0">
+                                    <h3 className="text-[16px] font-black text-slate-900">주변 시세 비교</h3>
+                                </div>
+                                <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-50" style={{ scrollbarGutter: 'stable' }}>
                                     {detailData.neighbors.map((item, i) => (
                                         <NeighborItem key={i} item={item} currentPrice={detailData.currentPrice} />
                                     ))}
                                 </div>
-                            </div>
+                            </Card>
                         </div>
 
                         {/* 3. Transaction Table & Info */}
@@ -537,15 +661,15 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                             <Card className="bg-white overflow-hidden flex flex-col h-[500px]">
                                 <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
                                     <h3 className="text-[16px] font-black text-slate-900">실거래 내역</h3>
-                                    <select 
+                                    <CustomDropdown
                                         value={txFilter}
-                                        onChange={(e) => setTxFilter(e.target.value as TransactionType)}
-                                        className="text-[12px] font-bold bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 focus:ring-0 focus:border-slate-300"
-                                    >
-                                        <option value="전체">전체</option>
-                                        <option value="매매">매매</option>
-                                        <option value="전세">전세</option>
-                                    </select>
+                                        onChange={setTxFilter}
+                                        options={[
+                                            { value: '전체', label: '전체' },
+                                            { value: '매매', label: '매매' },
+                                            { value: '전세', label: '전세' }
+                                        ]}
+                                    />
                                 </div>
                                 
                                 <div className="grid grid-cols-4 py-3 px-4 bg-slate-50/50 text-[12px] font-bold text-slate-500 border-b border-slate-100">
@@ -555,22 +679,36 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId, onBa
                                     <div className="text-right pr-4">거래액</div>
                                 </div>
                                 
-                                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
                                     {filteredTransactions.map((tx, i) => (
                                         <TransactionRow key={i} tx={tx} />
                                     ))}
                                 </div>
                             </Card>
 
-                            <Card className="bg-white overflow-hidden">
-                                <div className="p-5 border-b border-slate-100">
-                                    <h3 className="text-[16px] font-black text-slate-900">단지 정보</h3>
+                            <Card className="bg-white overflow-hidden flex flex-col h-[400px]">
+                                <div className="p-5 border-b border-slate-100 flex-shrink-0">
+                                    <h3 className="text-[16px] font-black text-slate-900">관련 뉴스</h3>
                                 </div>
-                                <div className="divide-y divide-slate-50">
-                                    {detailData.info.map((info, i) => (
-                                        <div key={i} className="flex justify-between p-4 text-[14px]">
-                                            <span className="font-medium text-slate-500">{info.label}</span>
-                                            <span className="font-bold text-slate-900 text-right">{info.value}</span>
+                                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3" style={{ scrollbarGutter: 'stable' }}>
+                                    {detailData.news.map((newsItem, i) => (
+                                        <div key={i} className="bg-blue-50 rounded-lg p-4 hover:bg-blue-100/80 transition-colors cursor-pointer">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[12px] font-medium text-blue-600">{newsItem.source}</span>
+                                                    <span className="text-[12px] text-blue-400">·</span>
+                                                    <span className="text-[12px] text-blue-500">{newsItem.time}</span>
+                                                </div>
+                                                <ExternalLink className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                                            </div>
+                                            <h4 className="text-[15px] font-bold text-slate-900 mb-2 leading-tight">
+                                                {newsItem.title}
+                                            </h4>
+                                            {newsItem.snippet && (
+                                                <p className="text-[13px] text-slate-600 leading-relaxed line-clamp-2">
+                                                    {newsItem.snippet}
+                                                </p>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
