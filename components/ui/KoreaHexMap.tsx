@@ -138,11 +138,11 @@ export const KoreaHexMap: React.FC<KoreaHexMapProps> = ({ region, className }) =
     return mergeCoordinatesWithData(coordinates, dummyData);
   }, [region]);
 
-  // 차트 옵션
-  const chartOptions: Highcharts.Options = {
+  // 차트 옵션 (region 변경 시 재생성)
+  const chartOptions: Highcharts.Options = useMemo(() => ({
     chart: {
       type: 'tilemap',
-      height: region === '지방 5대광역시' ? 300 : 400,
+      height: '100%', // 컨테이너 높이에 맞춤
       backgroundColor: 'transparent',
       style: {
         fontFamily: 'inherit'
@@ -180,9 +180,10 @@ export const KoreaHexMap: React.FC<KoreaHexMapProps> = ({ region, className }) =
     legend: {
       enabled: true,
       align: 'right',
-      verticalAlign: 'bottom',
+      verticalAlign: 'top',
       layout: 'horizontal',
       symbolWidth: 200,
+      symbolHeight: 16,
       itemStyle: {
         fontSize: '11px',
         fontWeight: '600',
@@ -196,7 +197,7 @@ export const KoreaHexMap: React.FC<KoreaHexMapProps> = ({ region, className }) =
           enabled: true,
           format: '{point.name}',
           style: {
-            fontSize: region === '수도권' ? '10px' : '12px',
+            fontSize: region === '지방 5대광역시' ? '24px' : '16px',
             fontWeight: '700',
             color: '#1e293b',
             textOutline: '2px white'
@@ -237,7 +238,7 @@ export const KoreaHexMap: React.FC<KoreaHexMapProps> = ({ region, className }) =
             tilemap: {
               dataLabels: {
                 style: {
-                  fontSize: '9px'
+                  fontSize: region === '지방 5대광역시' ? '16px' : '8px'
                 }
               }
             }
@@ -245,7 +246,7 @@ export const KoreaHexMap: React.FC<KoreaHexMapProps> = ({ region, className }) =
         }
       }]
     }
-  };
+  }), [region, mergedData]);
 
   // 리사이즈 핸들러
   useEffect(() => {
@@ -267,7 +268,7 @@ export const KoreaHexMap: React.FC<KoreaHexMapProps> = ({ region, className }) =
   }, [region]);
 
   return (
-    <div className={className}>
+    <div className={className} style={{ aspectRatio: '1 / 1' }}>
       <HighchartsReact
         highcharts={Highcharts}
         options={chartOptions}
