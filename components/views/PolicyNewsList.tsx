@@ -90,7 +90,7 @@ export const PolicyNewsList: React.FC = () => {
     <>
       <div className="bg-white rounded-[28px] p-8 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100/80 h-full flex flex-col">
         <div className="flex items-center justify-between mb-6 flex-shrink-0">
-          <h2 className="text-xl font-black text-slate-900 tracking-tight">부동산 정책 및 뉴스</h2>
+          <h2 className="text-xl font-black text-slate-900 tracking-tight">정책 및 뉴스</h2>
           <button className="text-[13px] font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1.5 hover:bg-slate-50 p-2 rounded-lg transition-colors">
             전체보기 <ChevronRight className="w-4 h-4" />
           </button>
