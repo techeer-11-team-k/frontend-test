@@ -65,11 +65,17 @@ export const RegionComparisonChart: React.FC = () => {
                 formatter={(value: number) => [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, '']}
               />
               <Legend 
-                wrapperStyle={{ paddingTop: '20px', textAlign: 'center' }}
+                wrapperStyle={{ 
+                  paddingTop: '10px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  width: '100%'
+                }}
                 iconType="circle"
                 align="center"
+                verticalAlign="bottom"
                 formatter={(value) => (
-                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>
                     {value === 'myProperty' ? '내 단지 상승률' : '행정구역 평균'}
                   </span>
                 )}

@@ -447,10 +447,9 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
       const visibleAssets = activeGroup.assets.filter(asset => asset.isVisible);
       if (visibleAssets.length === 0) return [];
 
-      // 모아보기: 개별 자산 라인들을 모두 표시 (평균선 제거)
-      // 개별보기: 개별 자산 라인들 표시
+      // 모아보기/개별보기 모두 아파트 이름 표시하지 않음
       return visibleAssets.map(asset => ({
-          name: viewMode === 'separate' ? '' : asset.name,
+          name: '',
           data: filterDataByPeriod(asset.chartData),
           color: asset.color,
           visible: true
@@ -649,7 +648,7 @@ export const Dashboard: React.FC<ViewProps> = ({ onPropertyClick, onViewAllPortf
                                 <div className="text-right">
                                     <p className="font-bold text-slate-900">{Math.floor(apt.price / 10000)}억</p>
                                     <p className={`text-[13px] font-bold ${apt.changeRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
-                                        {apt.changeRate >= 0 ? '+' : ''}{apt.changeRate}%
+                                        {apt.changeRate >= 0 ? '+' : '-'}{Math.abs(Math.floor(apt.price * apt.changeRate / 100)).toLocaleString()}만 ({Math.abs(apt.changeRate)}%)
                                     </p>
                                 </div>
                             </div>
