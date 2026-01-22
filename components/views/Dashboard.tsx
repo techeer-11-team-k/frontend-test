@@ -10,9 +10,6 @@ import { ProfileWidgetsCard } from '../ProfileWidgetsCard';
 import { ToggleButtonGroup } from '../ui/ToggleButtonGroup';
 import { ApartmentRow } from '../ui/ApartmentRow';
 
-// ----------------------------------------------------------------------
-// DATA & UTILS
-// ----------------------------------------------------------------------
 
 // Real apartment price data (approximate historical data in 만원)
 const realApartmentData: Record<string, { time: string; value: number }[]> = {
